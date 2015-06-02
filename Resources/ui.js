@@ -1,10 +1,39 @@
-exports.createDialog = function createDialog(callback) {
-	var last = Ti.App.Properties.getString('proxy::last');
+exports.createDialog = function createDialog() {
+	var settings = Ti.App.Properties.getObject('proxy::settings', {});
 
 	function select(url) {
-		Ti.App.Properties.setString('proxy::last', url);
 
-		callback(url);
+		if (go.enabled === false) {
+			console.debug('Already loading..');
+			return;
+		}
+
+		go.applyProperties({
+			title: 'LOADING',
+			enabled: false,
+			backgroundColor: 'transparent'
+		});
+
+		settings.url = url;
+		settings.alloy = alloyCheckbox.backgroundColor === 'white';
+
+		Ti.App.Properties.setObject('proxy::settings', settings);
+
+		require('codebase').create({
+			url: url
+		}, function afterCreate(err) {
+
+			go.applyProperties({
+				title: 'LOAD',
+				enabled: true,
+				backgroundColor: '#aa1617'
+			});
+
+			if (err) {
+				alert(err);
+			}
+
+		});
 	}
 
 	var win = Ti.UI.createWindow({
@@ -15,13 +44,16 @@ exports.createDialog = function createDialog(callback) {
 		top: 100,
 		right: 20,
 		left: 20,
-		height: 40,
+		height: Ti.Platform.name === 'android' ? Ti.UI.SIZE : 40,
 		paddingLeft: 10,
 		paddingRight: 10,
 		returnKeyType: Ti.UI.RETURNKEY_GO,
+		keyboardType: Ti.UI.KEYBOARD_URL,
+		autocorrect: false,
 		hintText: 'http://',
-		value: last,
+		value: settings.url,
 		backgroundColor: 'white',
+		color: '#333',
 		borderWidth: 2,
 		borderColor: '#aa1617'
 	});
@@ -30,10 +62,34 @@ exports.createDialog = function createDialog(callback) {
 		select(e.value);
 	});
 
-	var go = Ti.UI.createButton({
+	var alloyCheckbox = Ti.UI.createView({
 		top: 160,
+		left: 20,
+		width: 30,
+		height: 30,
+		backgroundColor: settings.alloy ? 'white' : 'transparent',
+		borderWidth: 2,
+		borderColor: '#aa1617'
+	});
+
+	alloyCheckbox.addEventListener('click', function onClick() {
+		alloyCheckbox.backgroundColor = (alloyCheckbox.backgroundColor === 'white') ? 'transparent' : 'white';
+	});
+
+	var alloyLabel = Ti.UI.createLabel({
+		top: 160,
+		left: 60,
+		height: 30,
+		verticalAlign: Ti.UI.TEXT_VERTICAL_ALIGNMENT_CENTER,
+		color: 'white',
+		text: 'Alloy project'
+	});
+
+	var go = Ti.UI.createButton({
+		top: 210,
 		right: 20,
 		width: 100,
+		height: 30,
 		title: 'LOAD',
 		backgroundColor: '#aa1617',
 		color: 'white'
@@ -44,9 +100,10 @@ exports.createDialog = function createDialog(callback) {
 	});
 
 	var examples = Ti.UI.createButton({
-		top: 160,
+		top: 210,
 		left: 20,
 		width: 100,
+		height: 30,
 		title: 'EXAMPLES',
 		backgroundColor: '#aa1617',
 		color: 'white'
@@ -72,8 +129,6 @@ exports.createDialog = function createDialog(callback) {
 		}, {
 			label: 'Gist - Raw',
 			url: 'https://gist.githubusercontent.com/FokkeZB/f7b3cbde8c180afe6fa3/raw'
-		}, {
-			label: ''
 		}];
 
 		var dialog = Ti.UI.createOptionDialog({
@@ -105,8 +160,13 @@ exports.createDialog = function createDialog(callback) {
 	});
 
 	win.add(url);
+
+	win.add(alloyCheckbox);
+	win.add(alloyLabel);
+
 	win.add(examples);
 	win.add(go);
+
 	win.add(instructions);
 
 	return win;

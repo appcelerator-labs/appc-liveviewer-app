@@ -1,65 +1,88 @@
+var async = require('async');
+var xhr = require('xhr');
+
 var REGEXP_GIST = /^https:\/\/gist\.github\.com\/([^\/]+)\/([a-z0-9]+)(?:#(file-[a-z0-9-]+))?$/;
 
-exports.resolve = function resolve(url, callback) {
+exports.download = function download(url, dir, callback) {
 	var match;
 
 	if ((match = url.match(REGEXP_GIST))) {
+		var username = match[1];
+		var gist = match[2];
+		var filehash = match[3];
 
-		return api('https://api.github.com/gists/' + match[2], function (err, response) {
-			var url;
+		var url = 'https://api.github.com/gists/' + gist;
 
-			console.log(response);
+		console.debug('GitHub API: ' + url);
+
+		xhr(url, {
+			contentType: 'application/json'
+		}, function (err, data) {
 
 			if (err) {
 				return callback(err);
 			}
 
-			for (var filename in response.files) {
+			var filename;
 
-				if (match[3] ? (filenameToHash(filename) === match[3]) : !url) {
-					url = response.files[filename].raw_url;
+			async.eachSeries(data.files, function iterator(file, next) {
+
+				if (filehash) {
+
+					if (filenameToHash(file.filename) === filehash) {
+						filename = file.filename;
+					} else {
+						return next();
+					}
+
+				} else if (file.type === 'application/javascript' && (!filename || file.filename === 'app.js')) {
+					filename = file.filename;
 				}
-			}
 
-			if (!url) {
-				return callback('Could not find raw URL for gist.');
-			}
+				xhr(file.raw_url, {
+					contentType: file.type,
+					write: dir.resolve() + '/' + file.filename
+				}, function (err, data) {
 
-			return callback(null, url);
+					if (err) {
+						return next(err);
+					}
+
+					next();
+
+				});
+
+			}, function afterSeries(err) {
+				console.debug('filename: ' + filename);
+
+				if (!filename) {
+
+					if (filehash) {
+						return callback('Could not find: ' + filehash);
+					} else {
+						return callback('Could not find app.js or other JavaScript file.');
+					}
+				}
+
+				var moduleId = filename.substr(0, filename.lastIndexOf('.'));
+
+				console.debug('moduleId: ' + moduleId);
+
+				return callback(null, moduleId);
+
+			});
 		});
+
+		return true;
 	}
 
-	return callback();
+	return false;
 };
 
-function api(url, callback) {
-
-	var xhr = Ti.Network.createHTTPClient({
-		onload: function onLoad() {
-
-			if (this.status !== 200 || !this.responseText) {
-				return callback('No response from GitHub API.');
-			}
-
-			var response;
-
-			try {
-				response = JSON.parse(this.responseText);
-			} catch (e) {
-				return callback('Invalid response from GitHub API.');
-			}
-
-			callback(null, response);
-		},
-		onerror: function onError(e) {
-			return callback('Could not connect to GitHub API: ' + e.error);
-		}
-	});
-
-	xhr.open('GET', url);
-	xhr.send();
-}
-
 function filenameToHash(filename) {
-	return 'file-' + filename.replace(/[^a-z0-9]+/g, '-');
+	var filehash = 'file-' + filename.replace(/[^a-z0-9]+/g, '-');
+
+	console.debug('Hashed filename: ' + filename + ' > ' + filehash);
+
+	return filehash;
 }
