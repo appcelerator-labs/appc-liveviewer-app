@@ -1,4 +1,5 @@
 var TiProxy = require('ti-proxy');
+var CFG = require('CFG');
 
 exports.createProxy = function createProxy(codebase) {
 
@@ -7,11 +8,19 @@ exports.createProxy = function createProxy(codebase) {
 
 		},
 		resource: function (path) {
+			var file;
 
-			path = 'images/appc.png';
+			file = Ti.Filesystem.getFile(codebase, CFG.PLATFORM_DIR, path);
 
-			return codebase + '/' + path;
+			if (!file.exists()) {
+				file = Ti.Filesystem.getFile(codebase, path);
+			}
 
+			if (!file.exists()) {
+				return;
+			}
+
+			return file.resolve();
 		},
 		exception: function (e) {
 
@@ -30,11 +39,9 @@ exports.createProxy = function createProxy(codebase) {
 		require: function (id) {
 			console.debug('require: ' + id);
 
-			var file = Ti.Filesystem.getFile(codebase, id + '.js');
+			var resource = proxy.resource(id + '.js');
 
-			console.debug('file: ' + file.resolve());
-
-			if (!file.exists()) {
+			if (!resource) {
 
 				// FIXME: will still crash on iOS: https://jira.appcelerator.org/browse/TIMOB-9198
 				try {
@@ -45,6 +52,8 @@ exports.createProxy = function createProxy(codebase) {
 					return;
 				}
 			}
+
+			var file = Ti.Filesystem.getFile(resource);
 
 			var functionBody = file.read().text;
 

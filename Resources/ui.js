@@ -112,6 +112,9 @@ exports.createDialog = function createDialog() {
 	examples.addEventListener('click', function onClick() {
 
 		var examples = [{
+			label: 'ZIP',
+			url: 'http://dev.fokkezb.nl/liveviewer/Resources.zip'
+		}, {
 			label: 'Gist',
 			url: 'https://gist.github.com/FokkeZB/f7b3cbde8c180afe6fa3'
 		}, {

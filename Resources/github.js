@@ -3,7 +3,7 @@ var xhr = require('xhr');
 
 var REGEXP_GIST = /^https:\/\/gist\.github\.com\/([^\/]+)\/([a-z0-9]+)(?:#(file-[a-z0-9-]+))?$/;
 
-exports.download = function download(url, dir, callback) {
+exports.resolve = function resolve(url, dir, callback) {
 	var match;
 
 	if ((match = url.match(REGEXP_GIST))) {
@@ -41,7 +41,8 @@ exports.download = function download(url, dir, callback) {
 
 				xhr(file.raw_url, {
 					contentType: file.type,
-					write: dir.resolve() + '/' + file.filename
+					dir: dir,
+					file: file.filename
 				}, function (err, data) {
 
 					if (err) {
@@ -53,7 +54,6 @@ exports.download = function download(url, dir, callback) {
 				});
 
 			}, function afterSeries(err) {
-				console.debug('filename: ' + filename);
 
 				if (!filename) {
 
@@ -64,11 +64,7 @@ exports.download = function download(url, dir, callback) {
 					}
 				}
 
-				var moduleId = filename.substr(0, filename.lastIndexOf('.'));
-
-				console.debug('moduleId: ' + moduleId);
-
-				return callback(null, moduleId);
+				return callback(null, dir + '/' + filename);
 
 			});
 		});

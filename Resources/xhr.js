@@ -1,6 +1,8 @@
 var fs = require('fs');
 
 module.exports = function xhr(url, opts, callback) {
+	opts = opts || {};
+
 	var xhr = Ti.Network.createHTTPClient({
 		cache: false,
 		onload: function onLoad() {
@@ -9,29 +11,40 @@ module.exports = function xhr(url, opts, callback) {
 				return callback('No response: ' + this.status);
 			}
 
-			var response;
-
 			var contentType = opts.contentType || this.getResponseHeader('Content-Type');
 
-			if (contentType === 'application/zip') {
+			if (opts.dir) {
+				opts.file = opts.file || 'app.js'
 
+				var file;
 
+				if (contentType === 'application/zip') {
+					file = Ti.Filesystem.createTempFile();
+					file.write(this.responseData);
 
-			} else {
+					var dir = fs.ensureDirSync(opts.dir);
 
-				if (opts.write) {
-					var file = fs.ensureFileSync(opts.write);
+					console.debug('Unzipping: ' + file.resolve() + ' > ' + dir.resolve());
+
+					require('ti.compression').unzip(dir.resolve(), file.resolve(), true);
+
+					return callback();
+
+				} else {
+					file = fs.ensureFileSync(opts.dir + '/' + opts.file);
 					file.write(this.responseData);
 
 					return callback();
 				}
+			}
 
-				if (contentType === 'application/json') {
-					try {
-						response = JSON.parse(this.responseText);
-					} catch (e) {
-						return callback('Invalid response: ' + this.responseText);
-					}
+			var response = this.responseText;
+
+			if (contentType === 'application/json') {
+				try {
+					response = JSON.parse(response);
+				} catch (e) {
+					return callback('Invalid response: ' + this.responseText);
 				}
 			}
 

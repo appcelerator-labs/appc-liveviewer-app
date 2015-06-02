@@ -1,21 +1,41 @@
-exports.ensureFileSync = function ensureFileSync(filepath) {
-	var path = Ti.Filesystem.applicationDataDirectory.replace(/\/$/, '');
-	var nodes = filepath.substr(path.length).replace(/^\//, '').split('/');
-	var file;
+exports.ensureFileSync = function ensureFileSync(path) {
+	var dir = path.substr(0, path.lastIndexOf('/'));
 
-	nodes.forEach(function (node) {
-		path += '/' + node;
+	exports.ensureDir(dir);
 
-		file = Ti.Filesystem.getFile(path);
+	var file = Ti.Filesystem.getFile(path);
 
-		if (path === filepath) {
-			return;
-		}
-
-		if (!file.exists()) {
-			file.createDirectory();
-		}
-	});
+	if (!file.exists()) {
+		file.createFile();
+	}
 
 	return file;
+};
+
+exports.ensureDirSync = function ensureDirSync(path) {
+	var create = [];
+	var exists = false;
+	var dir;
+
+	while (!exists) {
+		var file = Ti.Filesystem.getFile(path);
+
+		if (!dir) {
+			dir = file;
+		}
+
+		exists = file.exists();
+
+		if (!exists) {
+			create.unshift(file);
+		}
+
+		path = path.substr(0, path.lastIndexOf('/'));
+	}
+
+	create.forEach(function (file) {
+		file.createDirectory();
+	});
+
+	return dir;
 };
