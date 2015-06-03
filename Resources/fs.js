@@ -1,7 +1,7 @@
 exports.ensureFileSync = function ensureFileSync(path) {
 	var dir = path.substr(0, path.lastIndexOf('/'));
 
-	exports.ensureDir(dir);
+	exports.ensureDirSync(dir);
 
 	var file = Ti.Filesystem.getFile(path);
 

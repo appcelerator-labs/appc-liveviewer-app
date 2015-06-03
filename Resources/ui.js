@@ -82,7 +82,7 @@ exports.createDialog = function createDialog() {
 		height: 30,
 		verticalAlign: Ti.UI.TEXT_VERTICAL_ALIGNMENT_CENTER,
 		color: 'white',
-		text: 'Alloy project'
+		text: 'Compile with Alloy in the cloud'
 	});
 
 	var go = Ti.UI.createButton({
@@ -112,26 +112,20 @@ exports.createDialog = function createDialog() {
 	examples.addEventListener('click', function onClick() {
 
 		var examples = [{
-			label: 'ZIP',
+			label: 'GitHub repo with bare Alloy app in subfolder',
+			url: 'https://github.com/appcelerator/alloy/tree/master/samples/rss'
+		}, {
+			label: 'ZIP with classic project',
 			url: 'http://dev.fokkezb.nl/liveviewer/Resources.zip'
 		}, {
-			label: 'Gist',
+			label: 'Gist with two files',
 			url: 'https://gist.github.com/FokkeZB/f7b3cbde8c180afe6fa3'
 		}, {
-			label: 'Gist - File',
+			label: 'Single file of Gist',
 			url: 'https://gist.github.com/FokkeZB/f7b3cbde8c180afe6fa3#file-app-js'
 		}, {
-			label: 'Gist - Raw Commit',
+			label: 'JS file',
 			url: 'https://gist.githubusercontent.com/FokkeZB/f7b3cbde8c180afe6fa3/raw/ad99604a55889f4b53f455f687ffb38739690813/app.js'
-		}, {
-			label: 'Gist - Raw File',
-			url: 'https://gist.githubusercontent.com/FokkeZB/f7b3cbde8c180afe6fa3/raw/app.js'
-		}, {
-			label: 'Gist - Raw /',
-			url: 'https://gist.githubusercontent.com/FokkeZB/f7b3cbde8c180afe6fa3/raw/'
-		}, {
-			label: 'Gist - Raw',
-			url: 'https://gist.githubusercontent.com/FokkeZB/f7b3cbde8c180afe6fa3/raw'
 		}];
 
 		var dialog = Ti.UI.createOptionDialog({

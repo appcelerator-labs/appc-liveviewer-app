@@ -202,7 +202,7 @@ exports.create = function create(options) {
 				}
 
 				// *.image = 
-			} else if (couldBeAsset(node.left.property)) {
+			} else if (couldBeAsset(node.left.property, node.right)) {
 
 				if (options.resources) {
 
@@ -228,7 +228,7 @@ exports.create = function create(options) {
 				}
 
 				// image:
-			} else if (couldBeAsset(node.key)) {
+			} else if (couldBeAsset(node.key, node.value)) {
 
 				if (options.resources) {
 					node.value.value = toFullPath(node.value.value);
@@ -277,8 +277,9 @@ function binaryAdd(left, right) {
 	});
 }
 
-function couldBeAsset(name) {
+function couldBeAsset(name, value) {
 	return typeof name === 'string' &&
+		(!value || !isCallingTi(value)) &&
 		(name.toLowerCase().match('image$') ||
 			name.toLowerCase().match('icon$') || ['file', 'sound', 'icon', 'url', 'leftButton', 'rightButton', 'images'].indexOf(name) !== -1);
 }
@@ -286,6 +287,10 @@ function couldBeAsset(name) {
 function doNotTouch(node) {
 	return node instanceof UglifyJS.AST_Atom || //Booleans, Nulls, Undefined, etc 
 		node instanceof UglifyJS.AST_Lambda; //Functions, etc
+}
+
+function isCallingTi(node) {
+	return (node instanceof UglifyJS.AST_Call && node.expression.start.value.match && node.expression.start.value.match('^Ti(tanium)?$'));
 }
 
 function toFullPath(p) {

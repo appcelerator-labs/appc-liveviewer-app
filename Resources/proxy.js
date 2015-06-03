@@ -2,6 +2,7 @@ var TiProxy = require('ti-proxy');
 var CFG = require('CFG');
 
 exports.createProxy = function createProxy(codebase) {
+	var cache = {};
 
 	var proxy = {
 		clean: function () {
@@ -39,13 +40,17 @@ exports.createProxy = function createProxy(codebase) {
 		require: function (id) {
 			console.debug('require: ' + id);
 
+			if (cache[id]) {
+				return cache[id];
+			}
+
 			var resource = proxy.resource(id + '.js');
 
 			if (!resource) {
 
 				// FIXME: will still crash on iOS: https://jira.appcelerator.org/browse/TIMOB-9198
 				try {
-					return require(id);
+					return cache[id] = require(id);
 				} catch (e) {
 					console.error(JSON.stringify(e, null, true));
 					alert('Could not find module: ' + id);
@@ -70,13 +75,15 @@ exports.createProxy = function createProxy(codebase) {
 
 			var fn = new Function('module, exports, __filename, __dirname, __proxy', functionBody);
 
+			console.debug(filename, functionBody);
+
 			try {
 				fn(module, module.exports, filename, dirname, proxy);
 			} catch (e) {
 				alert(e);
 			}
 
-			return module.exports;
+			return cache[id] = module.exports;
 		}
 	};
 

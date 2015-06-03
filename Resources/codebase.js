@@ -35,10 +35,10 @@ exports.create = function create(opts, callback) {
 
 	console.debug('uuid dir: ' + dir);
 
-	if (alloy) {
+	if (alloy || url.indexOf('https://github.com/') === 0) {
 		console.debug('downloading via server');
 
-		download(CFG.SERVER_URL + '&url=' + encodeURIComponent(url), start);
+		download(CFG.SERVER_URL + encodeURIComponent(url), dir, start);
 
 	} else if (!require('github').resolve(url, dir, start)) {
 		console.debug('downloading directly');
@@ -69,6 +69,7 @@ exports.create = function create(opts, callback) {
 	}
 
 	function download(url, dir, callback) {
+		console.debug('Downloading: ' + url);
 
 		require('xhr')(url, {
 			dir: dir,

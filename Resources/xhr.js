@@ -13,6 +13,8 @@ module.exports = function xhr(url, opts, callback) {
 
 			var contentType = opts.contentType || this.getResponseHeader('Content-Type');
 
+			console.debug('contentType: ' + contentType);
+
 			if (opts.dir) {
 				opts.file = opts.file || 'app.js'
 
@@ -21,6 +23,10 @@ module.exports = function xhr(url, opts, callback) {
 				if (contentType === 'application/zip') {
 					file = Ti.Filesystem.createTempFile();
 					file.write(this.responseData);
+
+					console.log('saved as: ' + file.resolve());
+
+					console.log('ensuring: ' + opts.dir);
 
 					var dir = fs.ensureDirSync(opts.dir);
 
