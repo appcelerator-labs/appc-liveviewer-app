@@ -6,59 +6,61 @@ exports.createProxy = function createProxy(codebase) {
 
 	var proxy = {
 		clean: function () {
-
+			cache = {};
 		},
 		resource: function (path) {
-			var file;
+			var file = getFile(path);
 
-			file = Ti.Filesystem.getFile(codebase, CFG.PLATFORM_DIR, path);
-
-			if (!file.exists()) {
-				file = Ti.Filesystem.getFile(codebase, path);
-			}
-
-			if (!file.exists()) {
-				return;
+			if (!file) {
+				return path;
 			}
 
 			return file.resolve();
 		},
 		exception: function (e) {
+			console.error(JSON.stringify(e, null, ' '));
 
-			// TODO: figure out how to get more information onexceptions (it's {} somehow)
-			// https://github.com/dbankier/TiShadow/blob/master/app/Resources/api/Utils.js
-			console.error(JSON.stringify(e, null, true));
+			var location = e.filename;
 
-			var filename = e.filename;
+			if (location) {
 
-			if (filename.indexOf(codebase) === 0) {
-				filename = filename.substr(codebase.length + 1);
-			}
+				if (location.indexOf(codebase) === 0) {
+					location = location.substr(codebase.length + 1);
+				}
 
-			alert('Exception in ' + filename);
-		},
-		require: function (id) {
-			console.debug('require: ' + id);
-
-			if (cache[id]) {
-				return cache[id];
-			}
-
-			var resource = proxy.resource(id + '.js');
-
-			if (!resource) {
-
-				// FIXME: will still crash on iOS: https://jira.appcelerator.org/browse/TIMOB-9198
-				try {
-					return cache[id] = require(id);
-				} catch (e) {
-					console.error(JSON.stringify(e, null, true));
-					alert('Could not find module: ' + id);
-					return;
+				if (e.line && e.column) {
+					location += ' ' + e.line + ':' + e.column;
 				}
 			}
 
-			var file = Ti.Filesystem.getFile(resource);
+			Ti.UI.createAlertDialog({
+				title: location,
+				message: e.message || 'Unknown Uncaught Exception'
+			}).show();
+		},
+		require: function (id) {
+
+			if (cache[id]) {
+				console.debug('require cache: ' + id);
+
+				return cache[id];
+			}
+
+			var file = getFile(id + '.js');
+
+			if (!file) {
+				console.debug('require native: ' + id);
+
+				try {
+					cache[id] = require(id);
+					return cache[id];
+
+				} catch (e) {
+					return alert(e);
+				}
+			}
+
+			console.debug('require js: ' + id);
 
 			var functionBody = file.read().text;
 
@@ -83,9 +85,26 @@ exports.createProxy = function createProxy(codebase) {
 				alert(e);
 			}
 
-			return cache[id] = module.exports;
+			cache[id] = module.exports;
+			return;
 		}
 	};
+
+	function getFile(path) {
+		var file;
+
+		file = Ti.Filesystem.getFile(codebase, CFG.PLATFORM_DIR, path);
+
+		if (!file.exists()) {
+			file = Ti.Filesystem.getFile(codebase, path);
+		}
+
+		if (!file.exists()) {
+			return;
+		}
+
+		return file;
+	}
 
 	return proxy;
 };

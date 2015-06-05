@@ -19,7 +19,7 @@ exports.convert = function convert(code, options) {
 	});
 
 	if (options.exceptions !== false) {
-		code = 'try {' + code + '} catch (err) { ' + options.ns + '.exception({ filename: __filename, error: err }); }';
+		code = 'try {' + code + '} catch (e) { e.filename = __filename; ' + options.ns + '.exception(e); }';
 	}
 
 	return code;

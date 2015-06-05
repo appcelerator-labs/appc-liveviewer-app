@@ -30,8 +30,15 @@ exports.createDialog = function createDialog() {
 			});
 
 			if (err) {
-				alert(err);
+				return alert(err);
 			}
+
+			win.hide();
+
+			win.addEventListener('focus', function onFocus() {
+				win.removeEventListener('focus', onFocus);
+				win.show();
+			});
 
 		});
 	}
@@ -112,7 +119,10 @@ exports.createDialog = function createDialog() {
 	examples.addEventListener('click', function onClick() {
 
 		var examples = [{
-			label: 'GitHub repo with bare Alloy app in subfolder',
+			label: 'GitHub with Alloy project',
+			url: 'https://github.com/appcelerator/movies'
+		}, {
+			label: 'GitHub with bare Alloy app in subfolder',
 			url: 'https://github.com/appcelerator/alloy/tree/master/samples/rss'
 		}, {
 			label: 'ZIP with classic project',
