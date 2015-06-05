@@ -18,7 +18,8 @@ exports.createProxy = function createProxy(codebase) {
 			return file.resolve();
 		},
 		exception: function (e) {
-			console.error(JSON.stringify(e, null, ' '));
+
+			// console.error(JSON.stringify(e, null, ' '));
 
 			var location = e.filename;
 
@@ -64,9 +65,7 @@ exports.createProxy = function createProxy(codebase) {
 
 			var functionBody = file.read().text;
 
-			functionBody = TiProxy.convert(functionBody, {
-				UI: false
-			});
+			functionBody = TiProxy.convert(functionBody, proxy);
 
 			var module = {
 				exports: {}
@@ -77,7 +76,7 @@ exports.createProxy = function createProxy(codebase) {
 
 			var fn = new Function('module, exports, __filename, __dirname, __proxy', functionBody);
 
-			console.debug(filename, functionBody);
+			// console.debug(filename, functionBody);
 
 			try {
 				fn(module, module.exports, filename, dirname, proxy);
@@ -86,7 +85,8 @@ exports.createProxy = function createProxy(codebase) {
 			}
 
 			cache[id] = module.exports;
-			return;
+
+			return cache[id];
 		}
 	};
 
