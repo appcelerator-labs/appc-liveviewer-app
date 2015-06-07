@@ -1,33 +1,55 @@
+var _ = require('underscore');
 var TiProxy = require('ti-proxy');
 var CFG = require('CFG');
+var utils = require('utils');
 
 exports.createProxy = function createProxy(codebase) {
 	var cache = {};
+	var globals = {};
 
 	var proxy = {
+		globals: globals,
 		clean: function () {
 			cache = {};
+			globals = {};
 		},
-		resource: function (path) {
+		resource: function () {
+			var args = Array.prototype.slice.call(arguments);
+
+			// no arguments, return codebase
+			if (args.length === 0) {
+				return codebase;
+			}
+
+			// one argument, array of paths
+			if (Array.isArray(args[0])) {
+				return args[0].map(proxy.resource);
+			}
+
+			var path = utils.joinPath(args);
+
 			var file = getFile(path);
 
 			if (!file) {
+				console.debug('resource unresolved: ' + path);
+
 				return path;
 			}
 
-			return file.resolve();
+			var resolved = file.resolve();
+
+			console.debug('resource resolved: ' + path + ' (' + resolved + ')');
+
+			return resolved;
 		},
 		exception: function (e) {
 
-			// console.error(JSON.stringify(e, null, ' '));
+			console.error(JSON.stringify(e, null, ' '));
 
 			var location = e.filename;
 
 			if (location) {
-
-				if (location.indexOf(codebase) === 0) {
-					location = location.substr(codebase.length + 1);
-				}
+				location = stripCodebase(location);
 
 				if (e.line && e.column) {
 					location += ' ' + e.line + ':' + e.column;
@@ -61,25 +83,45 @@ exports.createProxy = function createProxy(codebase) {
 				}
 			}
 
+			var filename = file.resolve();
+			var dirname = filename.substr(0, filename.lastIndexOf('/'));
+
 			console.debug('require js: ' + id);
 
 			var functionBody = file.read().text;
 
-			functionBody = TiProxy.convert(functionBody, proxy);
+			functionBody = TiProxy.convert(functionBody, {
+				resource: true,
+				exception: true,
 
+				// only app.js variables are global
+				globals: (id === 'app')
+			});
+
+			// module interface
 			var module = {
 				exports: {}
 			};
 
-			var filename = file.resolve();
-			var dirname = filename.substr(0, filename.lastIndexOf('/'));
+			// module scope
+			var scope = _.extend({
+				module: module,
+				exports: module.exports,
+				require: proxy.require,
+				__filename: filename,
+				__dirname: dirname,
+				__proxy: proxy
+			}, proxy.globals);
 
-			var fn = new Function('module, exports, __filename, __dirname, __proxy', functionBody);
+			var argNames = Object.keys(scope).join(',');
+			var argValues = _.values(scope);
+
+			var fn = new Function(argNames, functionBody);
 
 			// console.debug(filename, functionBody);
 
 			try {
-				fn(module, module.exports, filename, dirname, proxy);
+				fn.apply(undefined, argValues);
 			} catch (e) {
 				alert(e);
 			}
@@ -91,19 +133,76 @@ exports.createProxy = function createProxy(codebase) {
 	};
 
 	function getFile(path) {
-		var file;
 
-		file = Ti.Filesystem.getFile(codebase, CFG.PLATFORM_DIR, path);
-
-		if (!file.exists()) {
-			file = Ti.Filesystem.getFile(codebase, path);
-		}
-
-		if (!file.exists()) {
+		// remote path
+		if (path.match(/^http(s)?:\/\//)) {
 			return;
 		}
 
-		return file;
+		//   if (Ti.Platform.displayCaps.density > 320) {
+		//   var rethd_file_name = injectSuffix(file, "@3x");  
+		//   if (Ti.Filesystem.getFile(rethd_file_name).exists() && Ti.Platform.displayCaps.density === "high") {
+		//     return rethd_file_name;
+		//   }
+		// }
+		// if (Ti.Platform.displayCaps.density > 160) {
+		//   var ret_file_name = injectSuffix(file, "@2x");  
+		//   if (Ti.Filesystem.getFile(ret_file_name).exists() && Ti.Platform.displayCaps.density === "high") {
+		//     return ret_file_name;
+		//   }
+		// }
+
+		// handle resourceDirectory() + path
+		path = stripCodebase(path);
+
+		var file, modifiedPath;
+
+		var extname = utils.extname(path);
+
+		if (extname === '.png' || extname === '.jpg') {
+
+			if (CFG.PLATFORM_NAME === 'ios') {
+
+				for (var ldf = CFG.LDF; ldf === 2; ldf--) {
+					modifiedPath = utils.injectSuffix(path, '@' + ldf + 'x');
+
+					file = Ti.Filesystem.getFile(codebase, CFG.PLATFORM_DIR, modifiedPath);
+
+					if (file.exists()) {
+						return file;
+					}
+
+					file = Ti.Filesystem.getFile(codebase, modifiedPath);
+
+					if (file.exists()) {
+						return file;
+					}
+				}
+			}
+		}
+
+		file = Ti.Filesystem.getFile(codebase, CFG.PLATFORM_DIR, path);
+
+		if (file.exists()) {
+			return file;
+		}
+
+		file = Ti.Filesystem.getFile(codebase, path);
+
+		if (file.exists()) {
+			return file;
+		}
+
+		return;
+	}
+
+	function stripCodebase(path) {
+
+		if (path.indexOf(codebase) === 0) {
+			path = path.substr(codebase.length + 1);
+		}
+
+		return path;
 	}
 
 	return proxy;

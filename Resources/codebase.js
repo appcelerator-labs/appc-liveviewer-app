@@ -126,4 +126,4 @@ function findApp(path) {
 	}
 
 	return;
-};
+}

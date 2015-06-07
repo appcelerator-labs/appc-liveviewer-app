@@ -11,6 +11,10 @@ exports.convert = function convert(code, options) {
 
 	var transformer = Transformer.create(options);
 
+	if (options.globals) {
+		ast.figure_out_scope();
+	}
+
 	ast = ast.transform(transformer);
 
 	code = ast.print_to_string({
@@ -32,6 +36,22 @@ exports.create = function create(options) {
 	options.ns = options.ns || '__proxy';
 
 	return new UglifyJS.TreeTransformer(null, function (node) {
+
+		if (options.globals) {
+
+			if (node instanceof UglifyJS.AST_SymbolVar && node.global()) {
+				var originalName = node.thedef.name;
+				node.thedef.name = options.ns + '.globals.' + node.thedef.name;
+
+				return new UglifyJS.AST_VarDef({
+					name: new UglifyJS.AST_SymbolConst({
+						name: originalName
+					}),
+					value: node
+				});
+			}
+
+		}
 
 		if (node instanceof UglifyJS.AST_Call) {
 
@@ -179,7 +199,7 @@ exports.create = function create(options) {
 				}
 			}
 
-		} else if (node instanceof UglifyJS.AST_Assign && !doNotTouch(node.right)) {
+		} else if (node instanceof UglifyJS.AST_Assign && node.right) {
 
 			// *.title =
 			if (node.left.property && node.left.property.match && node.left.property.match('^(title|text)id$')) {
