@@ -57,6 +57,9 @@
     <module platform="android" version="2.0.3">ti.compression</module>
     <module platform="iphone" version="1.1.0">ti.coremotion</module>
     <module platform="iphone" version="0.2.2">yy.tidynamicfont</module>
+    <module platform="android" version="1.6.4">com.alcoapps.actionbarextras</module>
+    <module platform="android" version="1.1.5">dk.napp.drawer</module>
+    <module platform="iphone" version="1.2.1">dk.napp.drawer</module>
   </modules>
     <deployment-targets>
         <target device="android">true</target>
