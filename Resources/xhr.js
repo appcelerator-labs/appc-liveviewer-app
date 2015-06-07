@@ -1,4 +1,4 @@
-var fs = require('fs');
+var utils = require('utils');
 
 module.exports = function xhr(url, opts, callback) {
 	opts = opts || {};
@@ -28,7 +28,7 @@ module.exports = function xhr(url, opts, callback) {
 
 					console.log('ensuring: ' + opts.dir);
 
-					var dir = fs.ensureDirSync(opts.dir);
+					var dir = utils.ensureDirSync(opts.dir);
 
 					console.debug('Unzipping: ' + file.resolve() + ' > ' + dir.resolve());
 
@@ -37,7 +37,7 @@ module.exports = function xhr(url, opts, callback) {
 					return callback();
 
 				} else {
-					file = fs.ensureFileSync(opts.dir + '/' + opts.file);
+					file = utils.ensureFileSync(opts.dir + '/' + opts.file);
 					file.write(this.responseData);
 
 					return callback();

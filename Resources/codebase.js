@@ -1,5 +1,3 @@
-var TiDynamicFont = require('yy.tidynamicfont');
-
 var CFG = require('CFG');
 
 var proxy;
@@ -18,6 +16,10 @@ exports.clean = function clean() {
 };
 
 exports.create = function create(opts, callback) {
+
+	// in case we were not reset by shake (e.g. Android back);
+	exports.clean();
+
 	var url = opts.url;
 	var alloy = opts.alloy;
 
@@ -138,9 +140,11 @@ function findApp(path) {
 
 function loadFonts(resourceDirectory) {
 
-	if (CFG.PLATFORM_NAME !== 'ios') {
+	if (!CFG.OS_IOS) {
 		return;
 	}
+
+	var dynamicFont = require('yy.tidynamicfont');
 
 	var paths = [
 		resourceDirectory + '/fonts',
@@ -158,7 +162,7 @@ function loadFonts(resourceDirectory) {
 		filenames.forEach(function (filename) {
 			if (filename.match(/\.(ttf|otf)$/i)) {
 				var file = Ti.Filesystem.getFile(path, filename);
-				TiDynamicFont.registerFont(file);
+				dynamicFont.registerFont(file);
 			}
 		});
 	});

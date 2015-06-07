@@ -1,3 +1,5 @@
+var CFG = require('CFG');
+
 exports.createDialog = function createDialog() {
 	var settings = Ti.App.Properties.getObject('proxy::settings', {});
 
@@ -72,9 +74,8 @@ exports.createDialog = function createDialog() {
 	var alloySwitch = Ti.UI.createSwitch({
 		top: 160,
 		left: 20,
-		width: 30,
-		height: 30,
-		value: !!settings.alloy
+		value: !!settings.alloy,
+		style: CFG.OS_ANDROID ? Ti.UI.Android.SWITCH_STYLE_CHECKBOX : undefined
 	});
 
 	var alloyLabel = Ti.UI.createLabel({

@@ -5,6 +5,8 @@ var CFG = {
 	LDF: Ti.Platform.displayCaps.logicalDensityFactor
 };
 
+CFG.OS_IOS = (CFG.PLATFORM_NAME === 'ios');
+CFG.OS_ANDORID = (CFG.PLATFORM_NAME === 'android');
 CFG.SERVER_URL = 'http://node.fokkezb.nl:8080/?platform=' + CFG.PLATFORM_NAME + '&url=';
 
 module.exports = CFG;

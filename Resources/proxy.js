@@ -167,7 +167,7 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 
 		if (extname === '.png' || extname === '.jpg') {
 
-			if (CFG.PLATFORM_NAME === 'ios') {
+			if (CFG.OS_IOS) {
 
 				for (var ldf = CFG.LDF; ldf === 2; ldf--) {
 					modifiedPath = utils.injectSuffix(path, '@' + ldf + 'x');

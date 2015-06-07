@@ -1,0 +1,23 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 0.2
+apiversion: 2
+description: The module simulates an app restart, reinitializing the whole app.
+Useful for example when a change of langauge is needed from inside the app 
+without rebuilding the whole UI.
+
+The code is taken from the Titanium SDK.
+
+author: Daniel Tamas
+license: Apache 2
+copyright: Copyright (c) by Appcelerator, Inc.
+
+
+# these should not be edited
+name: tiapprestart
+moduleid: info.rborn.tiapprestart
+guid: 8f8d3e85-3c4f-4b18-b6c5-6fb0722ea8c9
+platform: iphone
+minsdk: 3.2.1.GA

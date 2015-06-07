@@ -1,6 +1,48 @@
+var Utils = exports;
+
+// Somewhat conform fs-extra:
+// https://github.com/jprichardson/node-fs-extra#ensurefilefile-callback
+Utils.ensureFileSync = function ensureFileSync(path) {
+	var dir = path.substr(0, path.lastIndexOf('/'));
+
+	Utils.ensureDirSync(dir);
+
+	return Ti.Filesystem.getFile(path);
+};
+
+// Somewhat conform fs-extra:
+// https://github.com/jprichardson/node-fs-extra#ensuredirdir-callback
+Utils.ensureDirSync = function ensureDirSync(path) {
+	var create = [];
+	var exists = false;
+	var dir;
+
+	while (!exists) {
+		var file = Ti.Filesystem.getFile(path);
+
+		if (!dir) {
+			dir = file;
+		}
+
+		exists = file.exists();
+
+		if (!exists) {
+			create.unshift(file);
+		}
+
+		path = path.substr(0, path.lastIndexOf('/'));
+	}
+
+	create.forEach(function (file) {
+		file.createDirectory();
+	});
+
+	return dir;
+};
+
 // Somewhat conform NodeJS:
 // https://nodejs.org/api/path.html#path_path_join_path1_path2
-exports.joinPath = function joinPath(args) {
+Utils.joinPath = function joinPath(args) {
 	var path = args[0];
 
 	if (args.length > 0) {
@@ -22,7 +64,7 @@ exports.joinPath = function joinPath(args) {
 
 // By David Bankier:
 // https://github.com/dbankier/TiShadow/blob/master/app/Resources/api/DensityAssets.js#L55
-exports.injectSuffix = function injectSuffix(file, suffix) {
+Utils.injectSuffix = function injectSuffix(file, suffix) {
 	var parts = file.split('.');
 	var ext = parts.pop();
 	return parts.join('.') + suffix + '.' + ext;
@@ -30,7 +72,7 @@ exports.injectSuffix = function injectSuffix(file, suffix) {
 
 // Somewhat conform NodeJS:
 // https://nodejs.org/api/path.html#path_path_extname_p
-exports.extname = function extname(path) {
+Utils.extname = function extname(path) {
 	var index = path.lastIndexOf('.');
 
 	if (index === -1) {
