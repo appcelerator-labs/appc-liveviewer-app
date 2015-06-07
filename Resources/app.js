@@ -9,7 +9,7 @@
 
 		var CFG = require('CFG');
 
-		if (CFG.OS_IOS) {
+		if (CFG.OS_IOS && CFG.ENV_PRODUCTION) {
 
 			// works in production as well
 			require('info.rborn.tiapprestart').restartApp();

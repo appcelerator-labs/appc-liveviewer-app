@@ -140,8 +140,8 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 
 	function getFile(path) {
 
-		// remote path
-		if (path.match(/^http(s)?:\/\//)) {
+		// non-string or remote path
+		if (!_.isString(path) || path.match(/^http(s)?:\/\//)) {
 			return;
 		}
 

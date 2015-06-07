@@ -2,7 +2,8 @@ var CFG = {
 	DATA_DIR: 'code',
 	PLATFORM_DIR: Ti.Platform.name.replace(/iPhone OS/, 'iphone'),
 	PLATFORM_NAME: Ti.Platform.name.replace(/iPhone OS/, 'ios'),
-	LDF: Ti.Platform.displayCaps.logicalDensityFactor
+	LDF: Ti.Platform.displayCaps.logicalDensityFactor,
+	ENV_PRODUCTION: (Ti.Platform.deployType === 'production')
 };
 
 CFG.OS_IOS = (CFG.PLATFORM_NAME === 'ios');
