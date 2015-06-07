@@ -15,7 +15,7 @@ exports.createDialog = function createDialog() {
 		});
 
 		settings.url = url;
-		settings.alloy = alloyCheckbox.backgroundColor === 'white';
+		settings.alloy = !!alloySwitch.value;
 
 		Ti.App.Properties.setObject('proxy::settings', settings);
 
@@ -69,27 +69,21 @@ exports.createDialog = function createDialog() {
 		select(e.value);
 	});
 
-	var alloyCheckbox = Ti.UI.createView({
+	var alloySwitch = Ti.UI.createSwitch({
 		top: 160,
 		left: 20,
 		width: 30,
 		height: 30,
-		backgroundColor: settings.alloy ? 'white' : 'transparent',
-		borderWidth: 2,
-		borderColor: '#aa1617'
-	});
-
-	alloyCheckbox.addEventListener('click', function onClick() {
-		alloyCheckbox.backgroundColor = (alloyCheckbox.backgroundColor === 'white') ? 'transparent' : 'white';
+		value: !!settings.alloy
 	});
 
 	var alloyLabel = Ti.UI.createLabel({
 		top: 160,
-		left: 60,
+		left: 80,
 		height: 30,
 		verticalAlign: Ti.UI.TEXT_VERTICAL_ALIGNMENT_CENTER,
 		color: 'white',
-		text: 'Compile with Alloy in the cloud'
+		text: 'Compile Alloy in Cloud'
 	});
 
 	var go = Ti.UI.createButton({
@@ -168,7 +162,7 @@ exports.createDialog = function createDialog() {
 
 	win.add(url);
 
-	win.add(alloyCheckbox);
+	win.add(alloySwitch);
 	win.add(alloyLabel);
 
 	win.add(examples);
