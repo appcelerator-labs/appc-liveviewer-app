@@ -1,3 +1,5 @@
+var TiDynamicFont = require('yy.tidynamicfont');
+
 var CFG = require('CFG');
 
 var proxy;
@@ -52,18 +54,24 @@ exports.create = function create(opts, callback) {
 			return callback(err);
 		}
 
-		var dir = path.substr(0, path.lastIndexOf('/'));
+		var resourcesDirectory = path.substr(0, path.lastIndexOf('/'));
 
-		var moduleId = path.substr(dir.length + 1);
+		var moduleId = path.substr(resourcesDirectory.length + 1);
 		moduleId = moduleId.substr(0, moduleId.lastIndexOf('.'));
 
-		dir = dir.replace(new RegExp('/' + CFG.PLATFORM_DIR + '$'), '');
+		// if root module is in platform-dir, pop it
+		resourcesDirectory = resourcesDirectory.replace(new RegExp('/' + CFG.PLATFORM_DIR + '$'), '');
 
-		console.debug('dir: ' + dir);
+		console.debug('resourcesDirectory: ' + resourcesDirectory);
 		console.debug('moduleId: ' + moduleId);
 
-		proxy = require('proxy').createProxy(dir);
-		proxy.require(moduleId);
+		// create new proxy
+		proxy = require('proxy').createProxy(resourcesDirectory);
+		proxy.require(moduleId, {
+			root: true
+		});
+
+		loadFonts(resourcesDirectory);
 
 		callback();
 	}
@@ -126,4 +134,32 @@ function findApp(path) {
 	}
 
 	return;
+}
+
+function loadFonts(resourceDirectory) {
+
+	if (CFG.PLATFORM_NAME !== 'ios') {
+		return;
+	}
+
+	var paths = [
+		resourceDirectory + '/fonts',
+		resourceDirectory + '/iphone/fonts'
+	];
+
+	paths.forEach(function (path) {
+		var dir = Ti.Filesystem.getFile(path);
+		var filenames = dir.getDirectoryListing();
+
+		if (!filenames) {
+			return;
+		}
+
+		filenames.forEach(function (filename) {
+			if (filename.match(/\.(ttf|otf)$/i)) {
+				var file = Ti.Filesystem.getFile(path, filename);
+				TiDynamicFont.registerFont(file);
+			}
+		});
+	});
 }

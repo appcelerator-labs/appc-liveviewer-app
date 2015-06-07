@@ -3,7 +3,7 @@ var TiProxy = require('ti-proxy');
 var CFG = require('CFG');
 var utils = require('utils');
 
-exports.createProxy = function createProxy(codebase) {
+exports.createProxy = function createProxy(resourcesDirectory) {
 	var cache = {};
 	var globals = {};
 
@@ -16,9 +16,9 @@ exports.createProxy = function createProxy(codebase) {
 		resource: function () {
 			var args = Array.prototype.slice.call(arguments);
 
-			// no arguments, return codebase
+			// no arguments, return resourcesDirectory
 			if (args.length === 0) {
-				return codebase;
+				return resourcesDirectory;
 			}
 
 			// one argument, array of paths
@@ -49,7 +49,7 @@ exports.createProxy = function createProxy(codebase) {
 			var location = e.filename;
 
 			if (location) {
-				location = stripCodebase(location);
+				location = relativePath(location);
 
 				if (e.line && e.column) {
 					location += ' ' + e.line + ':' + e.column;
@@ -61,7 +61,13 @@ exports.createProxy = function createProxy(codebase) {
 				message: e.message || 'Unknown Uncaught Exception'
 			}).show();
 		},
-		require: function (id) {
+		require: function (id, opts) {
+			opts = opts || {};
+			opts.root = !!opts.root;
+
+			if (opts.root) {
+				proxy.clean();
+			}
 
 			if (cache[id]) {
 				console.debug('require cache: ' + id);
@@ -94,8 +100,8 @@ exports.createProxy = function createProxy(codebase) {
 				resource: true,
 				exception: true,
 
-				// only app.js variables are global
-				globals: (id === 'app')
+				// catch primary scope vars as globals
+				globals: opts.root
 			});
 
 			// module interface
@@ -153,7 +159,7 @@ exports.createProxy = function createProxy(codebase) {
 		// }
 
 		// handle resourceDirectory() + path
-		path = stripCodebase(path);
+		path = relativePath(path);
 
 		var file, modifiedPath;
 
@@ -166,13 +172,13 @@ exports.createProxy = function createProxy(codebase) {
 				for (var ldf = CFG.LDF; ldf === 2; ldf--) {
 					modifiedPath = utils.injectSuffix(path, '@' + ldf + 'x');
 
-					file = Ti.Filesystem.getFile(codebase, CFG.PLATFORM_DIR, modifiedPath);
+					file = Ti.Filesystem.getFile(resourcesDirectory, CFG.PLATFORM_DIR, modifiedPath);
 
 					if (file.exists()) {
 						return file;
 					}
 
-					file = Ti.Filesystem.getFile(codebase, modifiedPath);
+					file = Ti.Filesystem.getFile(resourcesDirectory, modifiedPath);
 
 					if (file.exists()) {
 						return file;
@@ -181,13 +187,13 @@ exports.createProxy = function createProxy(codebase) {
 			}
 		}
 
-		file = Ti.Filesystem.getFile(codebase, CFG.PLATFORM_DIR, path);
+		file = Ti.Filesystem.getFile(resourcesDirectory, CFG.PLATFORM_DIR, path);
 
 		if (file.exists()) {
 			return file;
 		}
 
-		file = Ti.Filesystem.getFile(codebase, path);
+		file = Ti.Filesystem.getFile(resourcesDirectory, path);
 
 		if (file.exists()) {
 			return file;
@@ -196,10 +202,10 @@ exports.createProxy = function createProxy(codebase) {
 		return;
 	}
 
-	function stripCodebase(path) {
+	function relativePath(path) {
 
-		if (path.indexOf(codebase) === 0) {
-			path = path.substr(codebase.length + 1);
+		if (path.indexOf(resourcesDirectory) === 0) {
+			path = path.substr(resourcesDirectory.length + 1);
 		}
 
 		return path;
