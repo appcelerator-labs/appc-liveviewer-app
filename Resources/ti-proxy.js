@@ -29,6 +29,7 @@ exports.convert = function convert(code, options) {
 };
 
 },{"./lib/transformer":2,"uglify-js":23}],2:[function(require,module,exports){
+(function (console){
 var UglifyJS = require('uglify-js');
 
 exports.create = function create(options) {
@@ -198,8 +199,16 @@ exports.create = function create(options) {
 
 		} else if (node instanceof UglifyJS.AST_Assign && node.right) {
 
-			// *.title =
-			if (node.left.property && node.left.property.match && node.left.property.match('^(title|text)id$')) {
+			// *.exitOnClose =
+			if (node.left.property && node.left.property === 'exitOnClose') {
+
+				if (options.exit) {
+					node.right = new UglifyJS.AST_False();
+					return node;
+				}
+
+				// *.title =
+			} else if (node.left.property && node.left.property.match && node.left.property.match('^(title|text)id$')) {
 
 				if (options.i18n) {
 					node.left.property = node.left.property.replace('id', '');
@@ -221,23 +230,37 @@ exports.create = function create(options) {
 				}
 			}
 
-		} else if (node instanceof UglifyJS.AST_ObjectKeyVal && !doNotTouch(node.value)) {
+		} else if (node instanceof UglifyJS.AST_ObjectKeyVal) {
 
-			// title:
-			if (typeof node.key === 'string' && node.key.match('^(title|text)id$')) {
+			// exitOnClose
+			if (node.key === 'exitOnClose') {
 
-				if (options.i18n) {
-					node.key = node.key.replace('id', '');
-					node.value = functionCall(options.ns + '.i18n', [node.value]);
+				if (options.exit) {
+
+					console.log('working on it');
+
+					node.value = new UglifyJS.AST_False();
 					return node;
 				}
 
-				// image:
-			} else if (couldBeAsset(node.key, node.value)) {
+			} else if (!doNotTouch(node.value)) {
 
-				if (options.resource) {
-					node.value = functionCall(options.ns + '.resource', [node.value]);
-					return node;
+				// title:
+				if (typeof node.key === 'string' && node.key.match('^(title|text)id$')) {
+
+					if (options.i18n) {
+						node.key = node.key.replace('id', '');
+						node.value = functionCall(options.ns + '.i18n', [node.value]);
+						return node;
+					}
+
+					// image:
+				} else if (couldBeAsset(node.key, node.value)) {
+
+					if (options.resource) {
+						node.value = functionCall(options.ns + '.resource', [node.value]);
+						return node;
+					}
 				}
 			}
 
@@ -280,7 +303,9 @@ function doNotTouch(node) {
 function isCallingTi(node) {
 	return (node instanceof UglifyJS.AST_Call && node.expression.start.value.match && node.expression.start.value.match('^Ti(tanium)?$'));
 }
-},{"uglify-js":23}],3:[function(require,module,exports){
+
+}).call(this,require("--console--"))
+},{"--console--":12,"uglify-js":23}],3:[function(require,module,exports){
 
 module.exports = (function () { return this; })();
 

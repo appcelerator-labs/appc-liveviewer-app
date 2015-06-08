@@ -2,7 +2,9 @@
 
 	require('ui').createDialog().open();
 
-	Ti.Gesture.addEventListener('shake', function restart() {
+	Ti.Gesture.addEventListener('shake', restart);
+
+	function restart() {
 		Ti.Gesture.removeEventListener('shake', restart);
 
 		require('codebase').clean();
@@ -19,6 +21,6 @@
 			// works in production on Android because we've disabled finishfalseroot
 			Ti.App._restart();
 		}
-	});
+	}
 
 })(this);

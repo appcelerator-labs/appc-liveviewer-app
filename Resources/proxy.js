@@ -105,6 +105,7 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 			functionBody = TiProxy.convert(functionBody, {
 				resource: true,
 				exception: true,
+				exit: true,
 
 				// catch primary scope vars as globals
 				globals: opts.root

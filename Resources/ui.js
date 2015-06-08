@@ -157,13 +157,13 @@ exports.createDialog = function createDialog() {
 			backgroundColor: 'black'
 		});
 
-		var activityIndicator = Ti.UI.createActivityIndicator({
+		var loadingIndicator = Ti.UI.createActivityIndicator({
 			visible: true,
 			message: 'Loading...',
 			color: 'white'
 		});
 
-		loadingWin.add(activityIndicator);
+		loadingWin.add(loadingIndicator);
 		loadingWin.open({
 			animated: false
 		});
@@ -176,7 +176,8 @@ exports.createDialog = function createDialog() {
 		require('codebase').create(settings, function afterCreate(err) {
 
 			// hide indicator so the loading app has a solid black background
-			activityIndicator.hide();
+			loadingWin.remove(loadingIndicator);
+			loadingIndicator = null;
 
 			if (err) {
 				loadingWin.close();
