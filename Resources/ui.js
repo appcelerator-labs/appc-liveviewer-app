@@ -1,3 +1,5 @@
+var Barcode = require('ti.barcode');
+
 var CFG = require('CFG');
 
 exports.createDialog = function createDialog() {
@@ -10,7 +12,7 @@ exports.createDialog = function createDialog() {
 	var samplesBtn = Ti.UI.createButton({
 		top: 40,
 		left: 20,
-		right: 20,
+		width: 100,
 		height: 40,
 		title: 'EXAMPLES',
 		backgroundColor: '#aa1617',
@@ -35,9 +37,27 @@ exports.createDialog = function createDialog() {
 			}
 
 			urlField.value = examples[e.index].url;
+
+			goBtn.fireEvent('click');
 		});
 
 		dialog.show();
+	});
+
+	var scanBtn = Ti.UI.createButton({
+		top: 40,
+		right: 20,
+		width: 100,
+		height: 40,
+		title: 'SCAN QR',
+		backgroundColor: '#aa1617',
+		color: 'white'
+	});
+
+	scanBtn.addEventListener('click', function onClick() {
+		Barcode.capture({
+			acceptedFormats: [Barcode.FORMAT_QR_CODE]
+		});
 	});
 
 	var urlField = Ti.UI.createTextField({
@@ -113,7 +133,7 @@ exports.createDialog = function createDialog() {
 		}
 
 		if (loadingWin) {
-			return console.debug('Already loading..');
+			return alert('Already loading..');
 		}
 
 		var loadingWin = Ti.UI.createWindow({
@@ -127,7 +147,9 @@ exports.createDialog = function createDialog() {
 		});
 
 		loadingWin.add(activityIndicator);
-		loadingWin.open();
+		loadingWin.open({
+			animated: false
+		});
 
 		settings.url = url;
 		settings.alloy = alloySwitch.value;
@@ -147,9 +169,9 @@ exports.createDialog = function createDialog() {
 			}
 
 			// on Android, the user can navigate back
-			// close loading window when window has focus again
-			win.addEventListener('focus', function onFocus() {
-				win.removeEventListener('focus', onFocus);
+			// close loading window when it gains focus
+			loadingWin.addEventListener('focus', function onFocus() {
+				loadingWin.removeEventListener('focus', onFocus);
 
 				loadingWin.close();
 				loadingWin = null;
@@ -165,6 +187,7 @@ exports.createDialog = function createDialog() {
 	});
 
 	win.add(samplesBtn);
+	win.add(scanBtn);
 
 	win.add(urlField);
 
@@ -175,6 +198,26 @@ exports.createDialog = function createDialog() {
 	win.add(goBtn);
 
 	win.add(instructions);
+
+	function onBarcodeSuccess(e) {
+
+		console.error(e);
+
+		if (e.contentType !== Barcode.URL) {
+			return alert('QR code is no URL.');
+		}
+
+		urlField.value = e.result;
+
+		goBtn.fireEvent('click');
+	}
+
+	Barcode.addEventListener('success', onBarcodeSuccess);
+
+	// cleanup when app restarts
+	win.addEventListener('close', function onClose() {
+		Barcode.removeEventListener('success', onBarcodeSuccess);
+	});
 
 	return win;
 };
