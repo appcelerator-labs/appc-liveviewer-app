@@ -35,7 +35,6 @@ function updateSamples() {
 	}, function (err, res) {
 
 		if (!err) {
-			CFG.SAMPLES = res;
 			Ti.App.Properties.setList('liveviewer::samples', res);
 		}
 

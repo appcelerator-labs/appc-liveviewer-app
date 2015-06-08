@@ -8,10 +8,10 @@ exports.createDialog = function createDialog() {
 	});
 
 	var samplesBtn = Ti.UI.createButton({
-		top: 50,
+		top: 40,
 		left: 20,
 		right: 20,
-		height: 30,
+		height: 40,
 		title: 'EXAMPLES',
 		backgroundColor: '#aa1617',
 		color: 'white'
@@ -79,7 +79,7 @@ exports.createDialog = function createDialog() {
 		top: 210,
 		left: 20,
 		width: 100,
-		height: 30,
+		height: 40,
 		title: 'SOURCE',
 		backgroundColor: '#aa1617',
 		color: 'white'
@@ -99,7 +99,7 @@ exports.createDialog = function createDialog() {
 		top: 210,
 		right: 20,
 		width: 100,
-		height: 30,
+		height: 40,
 		title: 'LOAD',
 		backgroundColor: '#aa1617',
 		color: 'white'
@@ -112,15 +112,22 @@ exports.createDialog = function createDialog() {
 			return alert('URL is missing.');
 		}
 
-		if (goBtn.enabled === false) {
+		if (loadingWin) {
 			return console.debug('Already loading..');
 		}
 
-		goBtn.applyProperties({
-			title: 'LOADING',
-			enabled: false,
-			backgroundColor: 'transparent'
+		var loadingWin = Ti.UI.createWindow({
+			backgroundColor: 'black'
 		});
+
+		var activityIndicator = Ti.UI.createActivityIndicator({
+			visible: true,
+			message: 'Loading...',
+			color: 'white'
+		});
+
+		loadingWin.add(activityIndicator);
+		loadingWin.open();
 
 		settings.url = url;
 		settings.alloy = alloySwitch.value;
@@ -129,28 +136,30 @@ exports.createDialog = function createDialog() {
 
 		require('codebase').create(settings, function afterCreate(err) {
 
-			goBtn.applyProperties({
-				title: 'LOAD',
-				enabled: true,
-				backgroundColor: '#aa1617'
-			});
+			// hide indicator so the loading app has a solid black background
+			activityIndicator.hide();
 
 			if (err) {
+				loadingWin.close();
+				loadingWin = null;
+
 				return alert(err);
 			}
 
-			win.hide();
-
+			// on Android, the user can navigate back
+			// close loading window when window has focus again
 			win.addEventListener('focus', function onFocus() {
 				win.removeEventListener('focus', onFocus);
-				win.show();
+
+				loadingWin.close();
+				loadingWin = null;
 			});
 
 		});
 	});
 
 	var instructions = Ti.UI.createLabel({
-		bottom: 100,
+		bottom: 40,
 		text: 'Shake anytime to return to this screen.',
 		color: 'white'
 	});

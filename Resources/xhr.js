@@ -22,13 +22,7 @@ module.exports = function xhr(url, opts, callback) {
 					file = Ti.Filesystem.createTempFile();
 					file.write(this.responseData);
 
-					console.log('saved as: ' + file.resolve());
-
-					console.log('ensuring: ' + opts.dir);
-
 					var dir = utils.ensureDirSync(opts.dir);
-
-					console.debug('Unzipping: ' + file.resolve() + ' > ' + dir.resolve());
 
 					require('ti.compression').unzip(dir.resolve(), file.resolve(), true);
 
