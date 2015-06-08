@@ -12,7 +12,6 @@
     <navbar-hidden>false</navbar-hidden>
     <analytics>true</analytics>
     <guid>92e3ee1a-2507-4c54-b3a0-3af19ccf0661</guid>
-    <property name="ti.android.bug2373.finishfalseroot" type="bool">false</property><!-- so we can restart -->
     <property name="ti.ui.defaultunit" type="string">dp</property>
     <ios>
         <plist>
