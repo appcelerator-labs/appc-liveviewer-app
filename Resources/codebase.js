@@ -42,7 +42,7 @@ exports.create = function create(opts, callback) {
 	if (alloy || url.indexOf('https://github.com/') === 0) {
 		console.debug('downloading via server');
 
-		download(CFG.SERVER_URL + encodeURIComponent(url), dir, start);
+		download(CFG.SERVER_URL + '/compile?platform=' + CFG.PLATFORM_NAME + '&url=' + encodeURIComponent(url), dir, start);
 
 	} else if (!require('github').resolve(url, dir, start)) {
 		console.debug('downloading directly');

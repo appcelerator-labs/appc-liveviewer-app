@@ -6,19 +6,21 @@ var utils = require('utils');
 exports.createProxy = function createProxy(resourcesDirectory) {
 	var cache = {};
 	var globals = {};
+	var sources = {};
 
 	var proxy = {
 		globals: globals,
 		clean: function () {
 			cache = {};
 			globals = {};
+			sources = {};
 		},
 		resource: function () {
 			var args = Array.prototype.slice.call(arguments);
 
-			// no arguments, return resourcesDirectory
+			// no arguments, return resourcesDirectory with trailing /
 			if (args.length === 0) {
-				return resourcesDirectory;
+				return resourcesDirectory + '/';
 			}
 
 			// one argument, array of paths
@@ -49,6 +51,8 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 			var location = e.filename;
 
 			if (location) {
+				console.error(sources[e.filename]);
+
 				location = relativePath(location);
 
 				if (e.line && e.column) {
@@ -103,6 +107,8 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 				// catch primary scope vars as globals
 				globals: opts.root
 			});
+
+			sources[filename] = functionBody;
 
 			// module interface
 			var module = {

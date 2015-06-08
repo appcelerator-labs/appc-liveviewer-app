@@ -18,26 +18,7 @@ exports.createDialog = function createDialog() {
 	});
 
 	samplesBtn.addEventListener('click', function onClick() {
-
-		var examples = [{
-			label: 'GitHub with Alloy project',
-			url: 'https://github.com/appcelerator/movies'
-		}, {
-			label: 'GitHub with bare Alloy app in subfolder',
-			url: 'https://github.com/appcelerator/alloy/tree/master/samples/rss'
-		}, {
-			label: 'ZIP with classic project',
-			url: 'http://dev.fokkezb.nl/liveviewer/Resources.zip'
-		}, {
-			label: 'Gist with two files',
-			url: 'https://gist.github.com/FokkeZB/f7b3cbde8c180afe6fa3'
-		}, {
-			label: 'Single file of Gist',
-			url: 'https://gist.github.com/FokkeZB/f7b3cbde8c180afe6fa3#file-app-js'
-		}, {
-			label: 'JS file',
-			url: 'https://gist.githubusercontent.com/FokkeZB/f7b3cbde8c180afe6fa3/raw/ad99604a55889f4b53f455f687ffb38739690813/app.js'
-		}];
+		var examples = CFG.SAMPLES;
 
 		var dialog = Ti.UI.createOptionDialog({
 			cancel: examples.length,
@@ -70,6 +51,9 @@ exports.createDialog = function createDialog() {
 		autocorrect: false,
 		hintText: 'http://',
 		value: settings.url,
+		font: {
+			fontSize: 15
+		},
 		backgroundColor: 'white',
 		color: '#333',
 		borderWidth: 2,
@@ -79,8 +63,7 @@ exports.createDialog = function createDialog() {
 	var alloySwitch = Ti.UI.createSwitch({
 		top: 160,
 		left: 20,
-		value: !!settings.alloy,
-		style: CFG.OS_ANDROID ? Ti.UI.Android.SWITCH_STYLE_CHECKBOX : undefined
+		value: !!settings.alloy
 	});
 
 	var alloyLabel = Ti.UI.createLabel({
@@ -140,13 +123,11 @@ exports.createDialog = function createDialog() {
 		});
 
 		settings.url = url;
-		settings.alloy = !!alloySwitch.value;
+		settings.alloy = alloySwitch.value;
 
 		Ti.App.Properties.setObject('proxy::settings', settings);
 
-		require('codebase').create({
-			url: url
-		}, function afterCreate(err) {
+		require('codebase').create(settings, function afterCreate(err) {
 
 			goBtn.applyProperties({
 				title: 'LOAD',

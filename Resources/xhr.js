@@ -3,12 +3,14 @@ var utils = require('utils');
 module.exports = function xhr(url, opts, callback) {
 	opts = opts || {};
 
-	var xhr = Ti.Network.createHTTPClient({
+	var client = Ti.Network.createHTTPClient({
 		cache: false,
 		onload: function onLoad() {
 
+			console.log(this.responseText);
+
 			if (this.status !== 200 || !this.responseText) {
-				return callback('No response: ' + this.status);
+				return callback(this.responseText || 'No response: ' + this.status);
 			}
 
 			var contentType = opts.contentType || this.getResponseHeader('Content-Type');
@@ -16,7 +18,7 @@ module.exports = function xhr(url, opts, callback) {
 			console.debug('contentType: ' + contentType);
 
 			if (opts.dir) {
-				opts.file = opts.file || 'app.js'
+				opts.file = opts.file || 'app.js';
 
 				var file;
 
@@ -57,10 +59,10 @@ module.exports = function xhr(url, opts, callback) {
 			callback(null, response);
 		},
 		onerror: function onError(e) {
-			return callback('No connection: ' + e.error + (e.code ? ' #' + e.code : ''));
+			return callback(this.responseText || ('Server error: ' + e.error + (e.code ? ' #' + e.code : '')));
 		}
 	});
 
-	xhr.open('GET', url);
-	xhr.send();
+	client.open('GET', url);
+	client.send();
 };
