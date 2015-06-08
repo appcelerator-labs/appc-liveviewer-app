@@ -145,20 +145,7 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 			return;
 		}
 
-		//   if (Ti.Platform.displayCaps.density > 320) {
-		//   var rethd_file_name = injectSuffix(file, "@3x");  
-		//   if (Ti.Filesystem.getFile(rethd_file_name).exists() && Ti.Platform.displayCaps.density === "high") {
-		//     return rethd_file_name;
-		//   }
-		// }
-		// if (Ti.Platform.displayCaps.density > 160) {
-		//   var ret_file_name = injectSuffix(file, "@2x");  
-		//   if (Ti.Filesystem.getFile(ret_file_name).exists() && Ti.Platform.displayCaps.density === "high") {
-		//     return ret_file_name;
-		//   }
-		// }
-
-		// handle resourceDirectory() + path
+		// remove resourceDirectory
 		path = relativePath(path);
 
 		var file, modifiedPath;

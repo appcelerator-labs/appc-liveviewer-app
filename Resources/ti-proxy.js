@@ -58,9 +58,8 @@ exports.create = function create(options) {
 			if (options.require) {
 
 				// require()
-				if (node.expression.start.value === 'require') {
-					node.name = node.expression.name = options.ns + '.require';
-					return;
+				if (node.expression.name === 'require') {
+					return functionCall(options.ns + '.require', node.args);
 				}
 			}
 
@@ -86,9 +85,8 @@ exports.create = function create(options) {
 			if (options.i18n) {
 
 				// L()
-				if (node.expression.start.value === 'L') {
-					node.name = node.expression.name = options.ns + '.i18n';
-					return node;
+				if (node.expression.name === 'L') {
+					return functionCall(options.ns + '.i18n', node.args);
 				}
 			}
 
@@ -193,7 +191,6 @@ exports.create = function create(options) {
 					!doNotTouch(node.args) &&
 					node.args[0] !== undefined &&
 					couldBeAsset(node.expression.end.value.replace('set', '').toLowerCase())) {
-					node.args[0].value = toFullPath(node.args[0].value);
 					node.args = [functionCall(options.ns + '.resource', node.args)];
 					return node;
 				}
@@ -211,7 +208,7 @@ exports.create = function create(options) {
 				}
 
 				// *.image = 
-			} else if (couldBeAsset(node.left.property, node.right)) {
+			} else if (couldBeAsset(node.left.property, node.right) && !doNotTouch(node.right)) {
 
 				if (options.resource) {
 
@@ -219,7 +216,6 @@ exports.create = function create(options) {
 						return node;
 					}
 
-					node.right.value = toFullPath(node.right.value);
 					node.right = functionCall(options.ns + '.resource', [node.right]);
 					return node;
 				}
@@ -240,7 +236,6 @@ exports.create = function create(options) {
 			} else if (couldBeAsset(node.key, node.value)) {
 
 				if (options.resource) {
-					node.value.value = toFullPath(node.value.value);
 					node.value = functionCall(options.ns + '.resource', [node.value]);
 					return node;
 				}
@@ -271,26 +266,10 @@ function functionCall(name, args) {
 	});
 }
 
-function functionCallByNode(node, args) {
-	return new UglifyJS.AST_Call({
-		expression: node,
-		args: args
-	});
-}
-
-function binaryAdd(left, right) {
-	return new UglifyJS.AST_Binary({
-		left: left,
-		operator: '+',
-		right: right
-	});
-}
-
 function couldBeAsset(name, value) {
-	return typeof name === 'string' &&
+	return (typeof name === 'string') &&
 		(!value || !isCallingTi(value)) &&
-		(name.toLowerCase().match('image$') ||
-			name.toLowerCase().match('icon$') || ['file', 'sound', 'icon', 'url', 'leftButton', 'rightButton', 'images'].indexOf(name) !== -1);
+		(name.match(/(^|[a-z])(image|icon)$/i) || ['file', 'sound', 'icon', 'url', 'leftButton', 'rightButton', 'images'].indexOf(name) !== -1);
 }
 
 function doNotTouch(node) {
@@ -301,17 +280,6 @@ function doNotTouch(node) {
 function isCallingTi(node) {
 	return (node instanceof UglifyJS.AST_Call && node.expression.start.value.match && node.expression.start.value.match('^Ti(tanium)?$'));
 }
-
-function toFullPath(p) {
-	if (typeof p === 'string' &&
-		p.match(/^\.{1,2}\//) &&
-		current_file) {
-		var full = path.join(path.dirname(current_file), p);
-		return full.substring(full.indexOf('Resources/') + 10);
-	}
-	return p;
-}
-
 },{"uglify-js":23}],3:[function(require,module,exports){
 
 module.exports = (function () { return this; })();
