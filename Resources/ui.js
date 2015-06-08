@@ -38,7 +38,12 @@ exports.createDialog = function createDialog() {
 
 			urlField.value = examples[e.index].url;
 
-			goBtn.fireEvent('click');
+			if (typeof examples[e.index] === 'boolean') {
+				cloudSwitch.value = examples[e.index];
+
+			} else {
+				checkCloud();
+			}
 		});
 
 		dialog.show();
@@ -80,13 +85,25 @@ exports.createDialog = function createDialog() {
 		borderColor: '#aa1617'
 	});
 
-	var alloySwitch = Ti.UI.createSwitch({
+	function checkCloud() {
+		if (urlField.value.indexOf('https://github.com/') === 0) {
+			cloudSwitch.value = true;
+			cloudSwitch.enabled = false;
+
+		} else {
+			cloudSwitch.enabled = true;
+		}
+	}
+
+	urlField.addEventListener('change', checkCloud);
+
+	var cloudSwitch = Ti.UI.createSwitch({
 		top: 160,
 		left: 20,
-		value: !!settings.alloy
+		value: !!settings.cloud
 	});
 
-	var alloyLabel = Ti.UI.createLabel({
+	var cloudLabel = Ti.UI.createLabel({
 		top: 160,
 		left: 80,
 		height: 30,
@@ -152,7 +169,7 @@ exports.createDialog = function createDialog() {
 		});
 
 		settings.url = url;
-		settings.alloy = alloySwitch.value;
+		settings.cloud = cloudSwitch.value;
 
 		Ti.App.Properties.setObject('proxy::settings', settings);
 
@@ -191,8 +208,8 @@ exports.createDialog = function createDialog() {
 
 	win.add(urlField);
 
-	win.add(alloySwitch);
-	win.add(alloyLabel);
+	win.add(cloudSwitch);
+	win.add(cloudLabel);
 
 	win.add(sourceBtn);
 	win.add(goBtn);
@@ -209,7 +226,7 @@ exports.createDialog = function createDialog() {
 
 		urlField.value = e.result;
 
-		goBtn.fireEvent('click');
+		checkCloud();
 	}
 
 	Barcode.addEventListener('success', onBarcodeSuccess);
