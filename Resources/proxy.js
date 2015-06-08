@@ -25,7 +25,9 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 
 			// one argument, array of paths
 			if (Array.isArray(args[0])) {
-				return args[0].map(proxy.resource);
+				return args[0].map(function (val) {
+					return proxy.resource(val);
+				});
 			}
 
 			var path = utils.joinPath(args);

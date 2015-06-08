@@ -7,15 +7,11 @@ module.exports = function xhr(url, opts, callback) {
 		cache: false,
 		onload: function onLoad() {
 
-			console.log(this.responseText);
-
 			if (this.status !== 200 || !this.responseText) {
 				return callback(this.responseText || 'No response: ' + this.status);
 			}
 
 			var contentType = opts.contentType || this.getResponseHeader('Content-Type');
-
-			console.debug('contentType: ' + contentType);
 
 			if (opts.dir) {
 				opts.file = opts.file || 'app.js';
