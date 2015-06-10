@@ -7,13 +7,58 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 	var cache = {};
 	var globals = {};
 	var sources = {};
+	var events = {};
 
 	var proxy = {
 		globals: globals,
 		clean: function () {
+			var removed = 0;
+
+			_.keys(events).forEach(function (ns) {
+				_.keys(events[ns]).forEach(function (name) {
+					events[ns][name].forEach(function (callback) {
+						Ti[ns].removeEventListener(name, callback);
+
+						removed++;
+					});
+				});
+			});
+
+			console.debug('removed ' + removed + ' events');
+
 			cache = {};
 			globals = {};
 			sources = {};
+			events = {};
+		},
+		events: {
+			addEventListener: function (ns, name, callback) {
+				console.debug('add event: Ti.' + name + ':' + name);
+
+				if (events[ns]) {
+					if (events[ns][name]) {
+						events[ns][name].push(callback);
+					} else {
+						events[ns][name] = [callback];
+					}
+				} else {
+					events[ns] = {};
+					events[ns][name] = [callback];
+				}
+
+				return Ti[ns].addEventListener(name, callback);
+			},
+			removeEventListener: function (ns, name, callback) {
+				console.debug('remove event: Ti.' + name + ':' + name);
+
+				if (events[ns] && events[ns][name]) {
+					events[ns][name] = _.without(events[ns][name], callback);
+				}
+
+				// not sure if this should only be called if found in the stack
+				// we've seen remove > add cause strange bugs
+				return Ti[ns].removeEventListener(name, callback);
+			}
 		},
 		resource: function () {
 			var args = Array.prototype.slice.call(arguments);
@@ -106,6 +151,7 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 				resource: true,
 				exception: true,
 				exit: true,
+				events: true,
 
 				// catch primary scope vars as globals
 				globals: opts.root

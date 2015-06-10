@@ -155,7 +155,7 @@ exports.create = function create(options) {
 				if (options.events) {
 
 					// Ti.(App|Geolication|Gesture).*Event()
-					if (node.expression.end.value.match('^(addEventListener|removeEventListener|fireEvent)$') && ['App', 'Gesture', 'Geolocation'].indexOf(node.expression.expression.property) > -1) {
+					if (node.expression.end.value.match('^(addEventListener|removeEventListener)$') && ['App', 'Gesture', 'Geolocation'].indexOf(node.expression.expression.property) > -1) {
 						return functionCall(options.ns + '.events.' + node.expression.end.value, [new UglifyJS.AST_String({
 							value: node.expression.expression.property
 						})].concat(node.args));
