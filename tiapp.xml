@@ -2,7 +2,7 @@
 <ti:app xmlns:ti="http://ti.appcelerator.org">
     <id>com.appcelerator.liveviewer</id>
     <name>LiveViewer</name>
-    <version>1.0</version>
+    <version>1.0.0.2</version>
     <publisher>not specified</publisher>
     <url>http://www.appcelerator.com</url>
     <description/>

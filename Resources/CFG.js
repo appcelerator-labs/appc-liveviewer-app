@@ -5,7 +5,7 @@ module.exports = CFG = {
 	PLATFORM_DIR: Ti.Platform.name.replace(/iPhone OS/, 'iphone'),
 	PLATFORM_NAME: Ti.Platform.name.replace(/iPhone OS/, 'ios'),
 	LDF: Ti.Platform.displayCaps.logicalDensityFactor,
-	ENV_PRODUCTION: (Ti.Platform.deployType === 'production'),
+	ENV_PRODUCTION: (Ti.App.deployType === 'production'),
 	SERVER_URL: 'http://node.fokkezb.nl:8080'
 };
 
