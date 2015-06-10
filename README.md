@@ -38,5 +38,8 @@ The app can load the following types via the server:
 * GitHub repo's, including a specific branch, subdirectory or file.
 * Gists containing Alloy files, including `app.tss`, `alloy.js` etc.
 
+## Ti-Proxy
+The app relies on the Titaniumified version of the OSS [Ti-Proxy](https://github.com/fokkezb/ti-proxy) inspired by the [transformations](https://github.com/dbankier/TiShadow/blob/master/cli/support/uglify.js) David Bankier's TiShadow does.
+
 ## Known issues
 See [GitHub](https://github.com/FokkeZB/appc-liveviewer-app/issues)
