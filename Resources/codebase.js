@@ -21,7 +21,7 @@ exports.create = function create(opts, callback) {
 	exports.clean();
 
 	var url = opts.url;
-	var cloud = opts.cloud;
+	var alloy = opts.alloy;
 
 	var uuid = Ti.Platform.createUUID();
 
@@ -39,8 +39,8 @@ exports.create = function create(opts, callback) {
 
 	console.debug('uuid dir: ' + dir);
 
-	if (cloud || url.indexOf('https://github.com/') === 0) {
-		console.debug('downloading via cloud');
+	if (alloy || url.indexOf('https://github.com/') === 0) {
+		console.debug('downloading via server');
 
 		download(CFG.SERVER_URL + '/compile?platform=' + CFG.PLATFORM_NAME + '&url=' + encodeURIComponent(url), dir, start);
 
