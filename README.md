@@ -24,7 +24,26 @@ The app loads a list of sample source URLs from the server, which redirects to a
 For now, [http://node.fokkezb.nl:8080/samples.json](http://node.fokkezb.nl:8080/samples.json) redirects to [https://gist.github.com/FokkeZB/d69277cbe15103bc0696](https://gist.github.com/FokkeZB/d69277cbe15103bc0696).
 
 ## QR
-Use the *Scan QR* button to scan a QR code containing an URL. Install a browser like [this one for Chrome](https://chrome.google.com/webstore/detail/the-qr-code-extension/oijdcdmnjjgnnhgljmhkjlablaejfeeb) to quickly open a Gist you are viewing in the app.
+Use the *Scan QR* button to scan a QR code containing either:
+
+### URL
+Install a browser like [this one for Chrome](https://chrome.google.com/webstore/detail/the-qr-code-extension/oijdcdmnjjgnnhgljmhkjlablaejfeeb) to quickly open a Gist you are viewing in the app.
+
+![URL](https://api.qrserver.com/v1/create-qr-code/?data=https%3A%2F%2Fgithub.com%2Fappcelerator%2Fmovies&size=150x150&margin=0)
+
+### JSON
+Containing an source URL and optional Alloy switch:
+
+	{"url":"https://github.com/appcelerator/movies","alloy":true}
+	
+![JSON](https://api.qrserver.com/v1/create-qr-code/?data=%7B%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fappcelerator%2Fmovies%22%2C%22alloy%22%3Atrue%7D&size=150x150&margin=0)
+
+### JS
+Containing actual Titanium JS code:
+
+	var win=Ti.UI.createWindow({backgroundColor:"white"});win.add(Ti.UI.createLabel({text:"Hello world"}));win.open();
+
+![JS](https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=0&data=var%20win%3DTi.UI.createWindow(%7BbackgroundColor%3A%22white%22%7D)%3Bwin.add(Ti.UI.createLabel(%7Btext%3A%22Hello%20world%22%7D))%3Bwin.open()%3B%0A)
 
 ## URLs
 The app can load the following types of URLs directly as long as they don't use Alloy:

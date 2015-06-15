@@ -201,13 +201,39 @@ exports.createDialog = function createDialog() {
 
 	function onBarcodeSuccess(e) {
 
-		console.error(e);
-
-		if (e.contentType !== Barcode.URL) {
-			return alert('QR code is no URL.');
+		// URL
+		if (e.contentType === Barcode.URL) {
+			urlField.value = e.result;
+			return;
 		}
 
-		urlField.value = e.result;
+		// TEXT
+		if (e.contentType === Barcode.TEXT) {
+
+			// JS
+			if (/Ti(tanium)?\.UI\.create/.test(e.result)) {
+				return eval(e.result);
+			}
+
+			// JSON
+			try {
+				var data = JSON.parse(e.result);
+
+				if (data.url) {
+					urlField.value = data.url;
+				}
+
+				if (typeof data.alloy === 'boolean') {
+					alloySwitch.value = data.alloy;
+				}
+
+				return;
+
+			} catch (e) {}
+		}
+
+		// unsupported
+		return alert('QR code is no URL.');
 	}
 
 	Barcode.addEventListener('success', onBarcodeSuccess);
