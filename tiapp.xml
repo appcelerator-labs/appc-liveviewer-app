@@ -1,61 +1,62 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<ti:app xmlns:ti="http://ti.appcelerator.org">
-    <id>com.appcelerator.liveviewer</id>
-    <name>LiveViewer</name>
-    <version>1.0.0.2</version>
-    <publisher>not specified</publisher>
-    <url>http://www.appcelerator.com</url>
-    <description/>
-    <copyright>not specified</copyright>
-    <icon>appicon.png</icon>
-    <fullscreen>false</fullscreen>
-    <navbar-hidden>false</navbar-hidden>
-    <analytics>true</analytics>
-    <guid>92e3ee1a-2507-4c54-b3a0-3af19ccf0661</guid>
-    <property name="ti.ui.defaultunit" type="string">dp</property>
-    <ios>
-        <plist>
-            <dict>
-                <key>UISupportedInterfaceOrientations~iphone</key>
-                <array>
-                    <string>UIInterfaceOrientationPortrait</string>
-                </array>
-                <key>UISupportedInterfaceOrientations~ipad</key>
-                <array>
-                    <string>UIInterfaceOrientationPortrait</string>
-                    <string>UIInterfaceOrientationPortraitUpsideDown</string>
-                    <string>UIInterfaceOrientationLandscapeLeft</string>
-                    <string>UIInterfaceOrientationLandscapeRight</string>
-                </array>
-                <key>UIRequiresPersistentWiFi</key>
-                <false/>
-                <key>UIPrerenderedIcon</key>
-                <false/>
-                <key>UIStatusBarHidden</key>
-                <false/>
-                <key>UIStatusBarStyle</key>
-                <string>UIStatusBarStyleDefault</string>
-            </dict>
-        </plist>
-    </ios>
-    <android xmlns:android="http://schemas.android.com/apk/res/android">
-        <manifest>
-            <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="22" />
-            <application>
-                <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyCoyD0fCRCKGVbolksWiYnXC_U48Naqw5I"/>
-            </application>
-        </manifest>
-    </android>
-    <mobileweb>
-        <precache>
-        </precache>
-        <splash>
-            <enabled>true</enabled>
-            <inline-css-images>true</inline-css-images>
-        </splash>
-        <theme>default</theme>
-    </mobileweb>
-    <modules>
+<?xml version="1.0" encoding="UTF-8"?>
+<ti:app 
+  xmlns:ti="http://ti.appcelerator.org">
+  <id>com.appcelerator.liveviewer</id>
+  <name>LiveViewer</name>
+  <version>1.0.0.3</version>
+  <publisher>not specified</publisher>
+  <url>http://www.appcelerator.com</url>
+  <description/>
+  <copyright>not specified</copyright>
+  <icon>appicon.png</icon>
+  <fullscreen>false</fullscreen>
+  <navbar-hidden>false</navbar-hidden>
+  <analytics>true</analytics>
+  <guid>92e3ee1a-2507-4c54-b3a0-3af19ccf0661</guid>
+  <property name="ti.ui.defaultunit" type="string">dp</property>
+  <ios>
+    <plist>
+      <dict>
+        <key>UISupportedInterfaceOrientations~iphone</key>
+        <array>
+          <string>UIInterfaceOrientationPortrait</string>
+        </array>
+        <key>UISupportedInterfaceOrientations~ipad</key>
+        <array>
+          <string>UIInterfaceOrientationPortrait</string>
+          <string>UIInterfaceOrientationPortraitUpsideDown</string>
+          <string>UIInterfaceOrientationLandscapeLeft</string>
+          <string>UIInterfaceOrientationLandscapeRight</string>
+        </array>
+        <key>UIRequiresPersistentWiFi</key>
+        <false/>
+        <key>UIPrerenderedIcon</key>
+        <false/>
+        <key>UIStatusBarHidden</key>
+        <false/>
+        <key>UIStatusBarStyle</key>
+        <string>UIStatusBarStyleDefault</string>
+      </dict>
+    </plist>
+  </ios>
+  <android 
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <manifest android:versionName="1.0.0" android:versionCode="3">
+      <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="22"/>
+      <application>
+        <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyCoyD0fCRCKGVbolksWiYnXC_U48Naqw5I"/>
+      </application>
+    </manifest>
+  </android>
+  <mobileweb>
+    <precache/>
+    <splash>
+      <enabled>true</enabled>
+      <inline-css-images>true</inline-css-images>
+    </splash>
+    <theme>default</theme>
+  </mobileweb>
+  <modules>
     <module platform="iphone" version="1.1.1">ti.compression</module>
     <module platform="android" version="2.0.3">ti.compression</module>
     <module platform="iphone" version="0.2.2">yy.tidynamicfont</module>
@@ -69,11 +70,11 @@
     <module platform="android" version="2.3.5">ti.barcode</module>
     <module platform="iphone" version="1.9.1">ti.barcode</module>
   </modules>
-    <deployment-targets>
-        <target device="android">true</target>
-        <target device="ipad">true</target>
-        <target device="iphone">true</target>
-        <target device="mobileweb">false</target>
-    </deployment-targets>
-    <sdk-version>4.0.0.GA</sdk-version>
+  <deployment-targets>
+    <target device="android">true</target>
+    <target device="ipad">true</target>
+    <target device="iphone">true</target>
+    <target device="mobileweb">false</target>
+  </deployment-targets>
+  <sdk-version>4.0.0.GA</sdk-version>
 </ti:app>

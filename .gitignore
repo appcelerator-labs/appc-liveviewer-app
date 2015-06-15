@@ -9,3 +9,4 @@ tmp
 Thumbs.db
 dist
 _conf
+node_modules
