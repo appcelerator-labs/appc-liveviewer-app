@@ -1,4 +1,5 @@
 var CFG = require('CFG');
+var utils = require('utils');
 
 var proxy;
 
@@ -25,14 +26,16 @@ exports.create = function create(opts, callback) {
 
 	var uuid = Ti.Platform.createUUID();
 
+	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19127
+	if (CFG.OS_WINDOWS) {
+		uuid = uuid.replace(/[\{\}]/g, '');
+	}
+
 	console.debug('url: ' + url);
 	console.debug('uuid: ' + uuid);
 
-	var dir = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, CFG.DATA_DIR, uuid);
-
-	if (!dir.exists()) {
-		dir.createDirectory();
-	}
+	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19128
+	var dir = utils.ensureDirSync(Ti.Filesystem.applicationDataDirectory + CFG.DATA_DIR + '/' + uuid);
 
 	// we only need the path, not the object
 	dir = dir.resolve();

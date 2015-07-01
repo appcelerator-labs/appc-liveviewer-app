@@ -1,5 +1,12 @@
 (function LiveViewer(global) {
 
+	var CFG = require('CFG');
+
+	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19125
+	if (CFG.OS_WINDOWS && !global.console.debug) {
+		global.console.debug = Ti.API.debug;
+	}
+
 	require('ui').createDialog().open();
 
 	Ti.Gesture.addEventListener('shake', restart);
@@ -9,12 +16,15 @@
 
 		require('codebase').clean();
 
-		var CFG = require('CFG');
-
 		if (CFG.OS_IOS && CFG.ENV_PRODUCTION) {
 
 			// works in production as well
 			require('info.rborn.tiapprestart').restartApp();
+
+		} else if (CFG.OS_WINDOWS) {
+
+			// FIXME: https://jira.appcelerator.org/browse/TIMOB-19122
+			require('ui').createDialog().open();
 
 		} else {
 

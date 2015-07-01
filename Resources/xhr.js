@@ -54,5 +54,11 @@ module.exports = function xhr(url, opts, callback) {
 	});
 
 	client.open('GET', url);
+
+	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19129
+	if (Ti.Platform.name === 'windows') { // can't require CFG since it depends on xhr
+		client.setRequestHeader('User-Agent', 'Appcelerator Titanium/' + (Ti.version || '4.1.0') + ' (' + Ti.Platform.model + '; ' + Ti.Platform.name + '; ' + Ti.Locale.currentLocale + ';)');
+	}
+
 	client.send();
 };

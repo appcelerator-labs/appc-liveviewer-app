@@ -11,6 +11,7 @@ module.exports = CFG = {
 
 CFG.OS_IOS = (CFG.PLATFORM_NAME === 'ios');
 CFG.OS_ANDORID = (CFG.PLATFORM_NAME === 'android');
+CFG.OS_WINDOWS = (CFG.PLATFORM_NAME === 'windows');
 
 Object.defineProperty(CFG, 'SAMPLES', {
 	get: function () {

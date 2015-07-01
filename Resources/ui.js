@@ -1,6 +1,6 @@
-var Barcode = require('ti.barcode');
-
 var CFG = require('CFG');
+
+var Barcode = (CFG.OS_ANDROID || CFG.OS_IOS) ? require('ti.barcode') : null;
 
 exports.createDialog = function createDialog() {
 	var settings = Ti.App.Properties.getObject('proxy::settings', {});
@@ -20,6 +20,13 @@ exports.createDialog = function createDialog() {
 	});
 
 	samplesBtn.addEventListener('click', function onClick() {
+
+		if (CFG.OS_WINDOWS) {
+
+			// FIXME: https://jira.appcelerator.org/browse/TIMOB-18754
+			return alert('OptionDialog does not work on Windows atm.');
+		}
+
 		var examples = CFG.SAMPLES;
 
 		var dialog = Ti.UI.createOptionDialog({
@@ -43,33 +50,45 @@ exports.createDialog = function createDialog() {
 		dialog.show();
 	});
 
-	var scanBtn = Ti.UI.createButton({
-		top: 40,
-		right: 20,
-		width: 100,
-		height: 40,
-		title: 'SCAN QR',
-		backgroundColor: '#aa1617',
-		color: 'white'
-	});
-
-	scanBtn.addEventListener('click', function onClick() {
-		Barcode.capture({
-			acceptedFormats: [Barcode.FORMAT_QR_CODE]
+	// FIXME: https://jira.appcelerator.org/browse/MOD-2133
+	if (CFG.OS_ANDROID || CFG.OS_IOS) {
+		var scanBtn = Ti.UI.createButton({
+			top: 40,
+			right: 20,
+			width: 100,
+			height: 40,
+			title: 'SCAN QR',
+			backgroundColor: '#aa1617',
+			color: 'white'
 		});
-	});
+
+		scanBtn.addEventListener('click', function onClick() {
+			Barcode.capture({
+				acceptedFormats: [Barcode.FORMAT_QR_CODE]
+			});
+		});
+
+		win.add(scanBtn);
+	}
 
 	var urlField = Ti.UI.createTextField({
 		top: 100,
 		right: 20,
 		left: 20,
 		height: Ti.Platform.name === 'android' ? Ti.UI.SIZE : 40,
+
+		// FIXME: https://jira.appcelerator.org/browse/TIMOB-19119
+		width: Ti.UI.FILL,
+
 		paddingLeft: 10,
 		paddingRight: 10,
 		keyboardType: Ti.UI.KEYBOARD_URL,
 		autocorrect: false,
 		hintText: 'http://',
-		value: settings.url,
+
+		// FIXME: https://jira.appcelerator.org/browse/TIMOB-19124
+		value: 'https://gist.github.com/FokkeZB/71bf38d2371c27132960',//settings.url || '',
+		
 		font: {
 			fontSize: 15
 		},
@@ -157,9 +176,13 @@ exports.createDialog = function createDialog() {
 
 		require('codebase').create(settings, function afterCreate(err) {
 
-			// hide indicator so the loading app has a solid black background
-			loadingWin.remove(loadingIndicator);
-			loadingIndicator = null;
+			// FIXME: https://jira.appcelerator.org/browse/TIMOB-19130
+			if (!CFG.OS_WINDOWS) {
+
+				// hide indicator so the loading app has a solid black background
+				loadingWin.remove(loadingIndicator);
+				loadingIndicator = null;
+			}
 
 			if (err) {
 				loadingWin.close();
@@ -187,61 +210,67 @@ exports.createDialog = function createDialog() {
 	});
 
 	win.add(samplesBtn);
-	win.add(scanBtn);
 
 	win.add(urlField);
 
-	win.add(alloySwitch);
-	win.add(alloyLabel);
+	if (!CFG.OS_WINDOWS) {
+		win.add(alloySwitch);
+		win.add(alloyLabel);
 
-	win.add(sourceBtn);
+		win.add(sourceBtn);
+	}
 	win.add(goBtn);
 
-	win.add(instructions);
-
-	function onBarcodeSuccess(e) {
-
-		// URL
-		if (e.contentType === Barcode.URL) {
-			urlField.value = e.result;
-			return;
-		}
-
-		// TEXT
-		if (e.contentType === Barcode.TEXT) {
-
-			// JS
-			if (/Ti(tanium)?\.UI\.create/.test(e.result)) {
-				return eval(e.result);
-			}
-
-			// JSON
-			try {
-				var data = JSON.parse(e.result);
-
-				if (data.url) {
-					urlField.value = data.url;
-				}
-
-				if (typeof data.alloy === 'boolean') {
-					alloySwitch.value = data.alloy;
-				}
-
-				return;
-
-			} catch (e) {}
-		}
-
-		// unsupported
-		return alert('QR code is no URL.');
+	if (!CFG.OS_WINDOWS) {
+		win.add(instructions);
 	}
 
-	Barcode.addEventListener('success', onBarcodeSuccess);
+	if (CFG.OS_ANDROID || CFG.OS_IOS) {
+		
+		function onBarcodeSuccess(e) {
 
-	// cleanup when app restarts
-	win.addEventListener('close', function onClose() {
-		Barcode.removeEventListener('success', onBarcodeSuccess);
-	});
+			// URL
+			if (e.contentType === Barcode.URL) {
+				urlField.value = e.result;
+				return;
+			}
+
+			// TEXT
+			if (e.contentType === Barcode.TEXT) {
+
+				// JS
+				if (/Ti(tanium)?\.UI\.create/.test(e.result)) {
+					return eval(e.result);
+				}
+
+				// JSON
+				try {
+					var data = JSON.parse(e.result);
+
+					if (data.url) {
+						urlField.value = data.url;
+					}
+
+					if (typeof data.alloy === 'boolean') {
+						alloySwitch.value = data.alloy;
+					}
+
+					return;
+
+				} catch (e) {}
+			}
+
+			// unsupported
+			return alert('QR code is no URL.');
+		}
+
+		Barcode.addEventListener('success', onBarcodeSuccess);
+
+		// cleanup when app restarts
+		win.addEventListener('close', function onClose() {
+			Barcode.removeEventListener('success', onBarcodeSuccess);
+		});
+	}
 
 	return win;
 };

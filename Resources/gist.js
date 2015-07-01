@@ -13,8 +13,6 @@ exports.resolve = function resolve(url, dir, callback) {
 
 		var url = 'https://api.github.com/gists/' + gist;
 
-		console.debug('GitHub API: ' + url);
-
 		xhr(url, {
 			contentType: 'application/json'
 		}, function (err, data) {
