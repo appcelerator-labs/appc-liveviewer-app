@@ -1,6 +1,8 @@
 # LiveViewer App
 An app to load and run Titanium and Alloy code from any URL, GitHub repositories and gists.
 
+![screenshots](screenshots.png)
+
 ## Goal
 
 * To provide a way for new users to try out Titanium and Alloy without needing to install it.

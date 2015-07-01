@@ -44,10 +44,10 @@ module.exports = function (grunt) {
           projectDir: './',
           platform: 'android',
           buildOnly: true,
-          // target: 'dist-playstore',
-          // keystore: '',
-          // alias: '',
-          // storePassword: '',
+          target: 'dist-playstore',
+          keystore: '_conf/android.keystore',
+          alias: 'liveviewer',
+          storePassword: 'appcelerator',
           outputDir: './dist'
         }
       }
@@ -113,8 +113,6 @@ module.exports = function (grunt) {
 
   grunt.registerTask('apple', ['bump', 'titanium:clean', 'titanium:appstore']);
   grunt.registerTask('google', ['bump', 'titanium:clean', 'titanium:android']);
-
-  grunt.registerTask('nexus', ['titanium:nexus']);
 
   grunt.registerTask('default', ['bump', 'build', 'upload']);
   grunt.registerTask('ios', ['bump', 'titanium:clean', 'titanium:ios', 'shell:ios']);
