@@ -1,6 +1,6 @@
 var CFG = require('CFG');
 
-var Barcode = (CFG.OS_ANDROID || CFG.OS_IOS) ? require('ti.barcode') : null;
+var Barcode = CFG.OS_WINDOWS ? null : require('ti.barcode');
 
 exports.createDialog = function createDialog() {
 	var settings = Ti.App.Properties.getObject('proxy::settings', {});
@@ -20,13 +20,6 @@ exports.createDialog = function createDialog() {
 	});
 
 	samplesBtn.addEventListener('click', function onClick() {
-
-		if (CFG.OS_WINDOWS) {
-
-			// FIXME: https://jira.appcelerator.org/browse/TIMOB-18754
-			return alert('OptionDialog does not work on Windows atm.');
-		}
-
 		var examples = CFG.SAMPLES;
 
 		var dialog = Ti.UI.createOptionDialog({
@@ -50,26 +43,21 @@ exports.createDialog = function createDialog() {
 		dialog.show();
 	});
 
-	// FIXME: https://jira.appcelerator.org/browse/MOD-2133
-	if (CFG.OS_ANDROID || CFG.OS_IOS) {
-		var scanBtn = Ti.UI.createButton({
-			top: 40,
-			right: 20,
-			width: 100,
-			height: 40,
-			title: 'SCAN QR',
-			backgroundColor: '#aa1617',
-			color: 'white'
-		});
+	var scanBtn = Ti.UI.createButton({
+		top: 40,
+		right: 20,
+		width: 100,
+		height: 40,
+		title: 'SCAN QR',
+		backgroundColor: '#aa1617',
+		color: 'white'
+	});
 
-		scanBtn.addEventListener('click', function onClick() {
-			Barcode.capture({
-				acceptedFormats: [Barcode.FORMAT_QR_CODE]
-			});
+	scanBtn.addEventListener('click', function onClick() {
+		Barcode.capture({
+			acceptedFormats: [Barcode.FORMAT_QR_CODE]
 		});
-
-		win.add(scanBtn);
-	}
+	});
 
 	var urlField = Ti.UI.createTextField({
 		top: 100,
@@ -87,8 +75,8 @@ exports.createDialog = function createDialog() {
 		hintText: 'http://',
 
 		// FIXME: https://jira.appcelerator.org/browse/TIMOB-19124
-		value: 'https://gist.github.com/FokkeZB/71bf38d2371c27132960',//settings.url || '',
-		
+		value: settings.url || '',
+
 		font: {
 			fontSize: 15
 		},
@@ -98,11 +86,35 @@ exports.createDialog = function createDialog() {
 		borderColor: '#aa1617'
 	});
 
-	var alloySwitch = Ti.UI.createSwitch({
-		top: 160,
-		left: 20,
-		value: !!settings.alloy
-	});
+	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19131
+	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19132
+	var alloySwitch;
+	if (CFG.OS_WINDOWS) {
+		alloySwitch = Ti.UI.createButton({
+			top: 210,
+			width: 100,
+			height: 40,
+			value: !!settings.alloy,
+			title: settings.alloy ? 'ALLOY' : 'CLASSIC',
+			backgroundColor: settings.alloy ? 'white' : '#aa1617',
+			color: settings.alloy ? '#aa1617' : 'white'
+		});
+		alloySwitch.addEventListener('click', function (e) {
+			var value = !e.source.value;
+			e.source.applyProperties({
+				value: value,
+				title: value ? 'ALLOY' : 'CLASSIC',
+				backgroundColor: value ? 'white' : '#aa1617',
+				color: value ? '#aa1617' : 'white'
+			});
+		});
+	} else {
+		alloySwitch = Ti.UI.createSwitch({
+			top: 160,
+			left: 20,
+			value: !!settings.alloy
+		});
+	}
 
 	var alloyLabel = Ti.UI.createLabel({
 		top: 160,
@@ -133,7 +145,7 @@ exports.createDialog = function createDialog() {
 		Ti.Platform.openURL(url);
 	});
 
-	var goBtn = Ti.UI.createButton({
+	var loadBtn = Ti.UI.createButton({
 		top: 210,
 		right: 20,
 		width: 100,
@@ -143,7 +155,7 @@ exports.createDialog = function createDialog() {
 		color: 'white'
 	});
 
-	goBtn.addEventListener('click', function onClick(e) {
+	loadBtn.addEventListener('click', function onClick(e) {
 		var url = urlField.value;
 
 		if (!url) {
@@ -205,28 +217,42 @@ exports.createDialog = function createDialog() {
 
 	var instructions = Ti.UI.createLabel({
 		bottom: 40,
-		text: 'Shake anytime to return to this screen.',
-		color: 'white'
+		color: 'white',
+
+		// FIXME: https://jira.appcelerator.org/browse/TIMOB-19048
+		text: CFG.OS_IOS ? 'Shake anytime to return to this screen.' : 'Shake or use the hardware back button\nto return to this screen.',
+		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+
+		// FIXME: https://jira.appcelerator.org/browse/TIMOB-19048
+		height: Ti.UI.SIZE,
+		width: Ti.UI.SIZE
 	});
 
-	win.add(samplesBtn);
+	// FIXME: https://jira.appcelerator.org/browse/TIMOB-18754
+	if (!CFG.OS_WINDOWS) {
+		win.add(samplesBtn);
+	}
+
+	// FIXME: https://jira.appcelerator.org/browse/MOD-2133
+	if (!CFG.OS_WINDOWS) {
+		win.add(scanBtn);
+	}
 
 	win.add(urlField);
 
+	win.add(alloySwitch);
+
 	if (!CFG.OS_WINDOWS) {
-		win.add(alloySwitch);
 		win.add(alloyLabel);
-
-		win.add(sourceBtn);
 	}
-	win.add(goBtn);
 
-	if (!CFG.OS_WINDOWS) {
-		win.add(instructions);
-	}
+	win.add(sourceBtn);
+	win.add(loadBtn);
+
+	win.add(instructions);
 
 	if (CFG.OS_ANDROID || CFG.OS_IOS) {
-		
+
 		function onBarcodeSuccess(e) {
 
 			// URL
@@ -240,7 +266,13 @@ exports.createDialog = function createDialog() {
 
 				// JS
 				if (/Ti(tanium)?\.UI\.create/.test(e.result)) {
-					return eval(e.result);
+
+					// protect local scope
+					(function () {
+						eval(e.result);
+					})();
+
+					return;
 				}
 
 				// JSON
