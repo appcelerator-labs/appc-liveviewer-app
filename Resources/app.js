@@ -1,5 +1,7 @@
 (function LiveViewer(global) {
 
+	try {
+
 	var CFG = require('CFG');
 
 	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19125
@@ -32,5 +34,9 @@
 			Ti.App._restart();
 		}
 	}
+
+} catch (e) {
+	alert(JSON.stringify(e));
+}
 
 })(this);

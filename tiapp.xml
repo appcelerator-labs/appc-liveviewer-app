@@ -42,7 +42,7 @@
   <android 
     xmlns:android="http://schemas.android.com/apk/res/android">
     <manifest android:versionName="1.0.0" android:versionCode="3">
-      <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="22"/>
+      <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21"/>
       <application>
         <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyCoyD0fCRCKGVbolksWiYnXC_U48Naqw5I"/>
       </application>
@@ -77,5 +77,5 @@
     <target device="mobileweb">false</target>
     <target device="windows">true</target>
   </deployment-targets>
-  <sdk-version>4.1.0.v20150626223333</sdk-version>
+  <sdk-version>4.1.0.v20150701131146</sdk-version>
 </ti:app>

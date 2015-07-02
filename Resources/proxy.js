@@ -65,7 +65,7 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 
 			// no arguments, return resourcesDirectory with trailing /
 			if (args.length === 0) {
-				return resourcesDirectory + '/';
+				return resourcesDirectory + CFG.SEPARATOR;
 			}
 
 			// one argument, array of paths
@@ -102,8 +102,12 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 
 				location = relativePath(location);
 
-				if (e.line && e.column) {
-					location += ' ' + e.line + ':' + e.column;
+				if (e.line) {
+					location += ' ' + e.line;
+
+					if (e.column || e.col) {
+						location += ':' + (e.column || e.col);
+					}
 				}
 			}
 
@@ -126,68 +130,73 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 				return cache[id];
 			}
 
-			var file = getFile(id + '.js');
+			var filename;
 
-			if (!file) {
-				console.debug('require native: ' + id);
+			// native require, Ti.Proxy convert and fn.apply could throw exceptions
+			try {
 
-				try {
+				var file = getFile(id + '.js');
+
+				if (!file) {
+					console.debug('require native: ' + id);
+
 					cache[id] = require(id);
 					return cache[id];
-
-				} catch (e) {
-					return alert(e);
 				}
-			}
 
-			var filename = file.resolve();
-			var dirname = filename.substr(0, filename.lastIndexOf('/'));
+				filename = file.resolve();
+				var dirname = filename.substr(0, filename.lastIndexOf(CFG.SEPARATOR));
 
-			console.debug('require js: ' + id);
+				console.debug('require js: ' + id);
 
-			var functionBody = file.read().text;
+				var functionBody = file.read().text;
 
-			functionBody = TiProxy.convert(functionBody, {
-				resource: true,
-				exception: true,
-				exit: true,
-				events: true,
+				functionBody = TiProxy.convert(functionBody, {
+					resource: true,
+					exception: true,
+					exit: true,
+					events: true,
 
-				// catch primary scope vars as globals
-				globals: opts.root
-			});
+					// catch primary scope vars as globals
+					globals: opts.root
+				});
 
-			sources[filename] = functionBody;
+				sources[filename] = functionBody;
 
-			// module interface
-			var module = {
-				exports: {}
-			};
+				// module interface
+				var module = {
+					exports: {}
+				};
 
-			// module scope
-			var scope = _.extend({
-				module: module,
-				exports: module.exports,
-				require: proxy.require,
-				__filename: filename,
-				__dirname: dirname,
-				__proxy: proxy
-			}, proxy.globals);
+				// module scope
+				var scope = _.extend({
+					module: module,
+					exports: module.exports,
+					require: proxy.require,
+					__filename: filename,
+					__dirname: dirname,
+					__proxy: proxy
+				}, proxy.globals);
 
-			var argNames = Object.keys(scope).join(',');
-			var argValues = _.values(scope);
+				var argNames = Object.keys(scope).join(',');
+				var argValues = _.values(scope);
 
-			var fn = new Function(argNames, functionBody);
+				var fn = new Function(argNames, functionBody);
 
-			// console.debug(filename, functionBody);
+				// console.debug(filename, functionBody);
 
-			try {
 				fn.apply(undefined, argValues);
-			} catch (e) {
-				alert(e);
-			}
 
-			cache[id] = module.exports;
+				cache[id] = module.exports;
+
+			} catch (e) {
+
+				if (_.isObject(e) && !e.filename) {
+					e.filename = filename || id;
+				}
+
+				return proxy.exception(e);
+			}
 
 			return cache[id];
 		}

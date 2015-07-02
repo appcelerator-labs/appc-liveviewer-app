@@ -1,9 +1,11 @@
+var CFG = require('CFG');
+
 var Utils = exports;
 
 // Somewhat conform fs-extra:
 // https://github.com/jprichardson/node-fs-extra#ensurefilefile-callback
 Utils.ensureFileSync = function ensureFileSync(path) {
-	var dir = path.substr(0, path.lastIndexOf('/'));
+	var dir = path.substr(0, path.lastIndexOf(CFG.SEPARATOR));
 
 	Utils.ensureDirSync(dir);
 
@@ -30,7 +32,7 @@ Utils.ensureDirSync = function ensureDirSync(path) {
 			create.unshift(file);
 		}
 
-		path = path.substr(0, path.lastIndexOf('/'));
+		path = path.substr(0, path.lastIndexOf(CFG.SEPARATOR));
 	}
 
 	create.forEach(function (file) {
@@ -43,6 +45,12 @@ Utils.ensureDirSync = function ensureDirSync(path) {
 // Somewhat conform NodeJS:
 // https://nodejs.org/api/path.html#path_path_join_path1_path2
 Utils.joinPath = function joinPath(args) {
+
+	// not a single arg with array, but separate args
+	if (arguments.length > 1) {
+		args = Array.prototype.slice.call(arguments);
+	}
+
 	var path = args[0];
 
 	if (args.length > 0) {
@@ -50,13 +58,9 @@ Utils.joinPath = function joinPath(args) {
 		for (var i = 1; i < args.length; i++) {
 			var arg = args[i];
 
-			if (typeof arg !== 'string') {
-				console.debug(args);
-			}
-
 			// only adds a slash when left arguments don't have it
-			if (arg.charAt(0) !== '/' && path.charAt(arg.length - 1) !== '/') {
-				path += '/' + arg;
+			if (arg.charAt(0) !== CFG.SEPARATOR && path.charAt(arg.length - 1) !== CFG.SEPARATOR) {
+				path += CFG.SEPARATOR + arg;
 			} else {
 				path += arg;
 			}
@@ -71,6 +75,7 @@ Utils.joinPath = function joinPath(args) {
 Utils.injectSuffix = function injectSuffix(file, suffix) {
 	var parts = file.split('.');
 	var ext = parts.pop();
+	
 	return parts.join('.') + suffix + '.' + ext;
 };
 

@@ -1,4 +1,5 @@
 var utils = require('utils');
+var CFG = require('CFG');
 
 module.exports = function xhr(url, opts, callback) {
 	opts = opts || {};
@@ -29,7 +30,7 @@ module.exports = function xhr(url, opts, callback) {
 					return callback();
 
 				} else {
-					file = utils.ensureFileSync(opts.dir + '/' + opts.file);
+					file = utils.ensureFileSync(opts.dir + CFG.SEPARATOR + opts.file);
 					file.write(this.responseData);
 
 					return callback();
@@ -56,7 +57,7 @@ module.exports = function xhr(url, opts, callback) {
 	client.open('GET', url);
 
 	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19129
-	if (Ti.Platform.name === 'windows') { // can't require CFG since it depends on xhr
+	if (CFG.OS_WINDOWS) {
 		client.setRequestHeader('User-Agent', 'Appcelerator Titanium/' + (Ti.version || '4.1.0') + ' (' + Ti.Platform.model + '; ' + Ti.Platform.name + '; ' + Ti.Locale.currentLocale + ';)');
 	}
 

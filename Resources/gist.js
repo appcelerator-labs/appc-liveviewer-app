@@ -1,5 +1,6 @@
 var async = require('async');
 var xhr = require('xhr');
+var CFG = require('CFG');
 
 var REGEXP_GIST = /^https:\/\/gist\.github\.com\/([^\/]+)\/([a-z0-9]+)(?:#(file-[a-z0-9-]+))?$/;
 
@@ -62,7 +63,7 @@ exports.resolve = function resolve(url, dir, callback) {
 					}
 				}
 
-				return callback(null, dir + '/' + filename);
+				return callback(null, dir + CFG.SEPARATOR + filename);
 
 			});
 		});

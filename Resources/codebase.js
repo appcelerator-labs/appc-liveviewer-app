@@ -35,7 +35,7 @@ exports.create = function create(opts, callback) {
 	console.debug('uuid: ' + uuid);
 
 	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19128
-	var dir = utils.ensureDirSync(Ti.Filesystem.applicationDataDirectory + CFG.DATA_DIR + '/' + uuid);
+	var dir = utils.ensureDirSync(utils.joinPath(Ti.Filesystem.applicationDataDirectory, CFG.DATA_DIR, uuid));
 
 	// we only need the path, not the object
 	dir = dir.resolve();
@@ -59,13 +59,13 @@ exports.create = function create(opts, callback) {
 			return callback(err);
 		}
 
-		var resourcesDirectory = path.substr(0, path.lastIndexOf('/'));
+		var resourcesDirectory = path.substr(0, path.lastIndexOf(CFG.SEPARATOR));
 
 		var moduleId = path.substr(resourcesDirectory.length + 1);
 		moduleId = moduleId.substr(0, moduleId.lastIndexOf('.'));
 
 		// if root module is in platform-dir, pop it
-		resourcesDirectory = resourcesDirectory.replace(new RegExp('/' + CFG.PLATFORM_DIR + '$'), '');
+		resourcesDirectory = resourcesDirectory.replace(new RegExp(CFG.SEPARATOR + CFG.PLATFORM_DIR + '$'), '');
 
 		console.debug('resourcesDirectory: ' + resourcesDirectory);
 		console.debug('moduleId: ' + moduleId);
@@ -130,7 +130,7 @@ function findApp(path) {
 	var files = dir.getDirectoryListing();
 
 	if (files.some(function (dirname) {
-			file = findApp(path + '/' + dirname);
+			file = findApp(path + CFG.SEPARATOR + dirname);
 
 			return !!file;
 		})) {
@@ -150,8 +150,8 @@ function loadFonts(resourceDirectory) {
 	var dynamicFont = require('yy.tidynamicfont');
 
 	var paths = [
-		resourceDirectory + '/fonts',
-		resourceDirectory + '/iphone/fonts'
+		utils.joinPath(resourceDirectory, 'fonts'),
+		utils.joinPath(resourceDirectory, 'iphone', 'fonts')
 	];
 
 	paths.forEach(function (path) {

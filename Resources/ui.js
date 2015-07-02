@@ -1,9 +1,15 @@
 var CFG = require('CFG');
+var xhr = require('xhr');
 
 var Barcode = CFG.OS_WINDOWS ? null : require('ti.barcode');
 
 exports.createDialog = function createDialog() {
-	var settings = Ti.App.Properties.getObject('proxy::settings', {});
+	var settings = Ti.App.Properties.getObject('proxy::settings', {
+		alloy: false,
+
+		// FIXME: For debugging
+		url: 'https://gist.github.com/FokkeZB/71bf38d2371c27132960'
+	});
 
 	var win = Ti.UI.createWindow({
 		backgroundColor: '#CD1625'
@@ -14,33 +20,36 @@ exports.createDialog = function createDialog() {
 		left: 20,
 		width: 100,
 		height: 40,
-		title: 'EXAMPLES',
+		title: 'SAMPLES',
 		backgroundColor: '#aa1617',
 		color: 'white'
 	});
 
+	// FIXME: https://jira.appcelerator.org/browse/TIMOB-18754
 	samplesBtn.addEventListener('click', function onClick() {
-		var examples = CFG.SAMPLES;
+		var samples = getSamples();
 
-		var dialog = Ti.UI.createOptionDialog({
-			cancel: examples.length,
-			selectedIndex: examples.length,
-			options: examples.map(function onEach(example) {
-				return example.label;
-			}).concat('Cancel')
+		var samplesWin = Ti.UI.createWindow({
+			top: CFG.OS_IOS ? 20 : 0,
+
+			// FIXME: https://jira.appcelerator.org/browse/TIMOB-19142
+			backgroundColor: CFG.OS_WINDOWS ? 'black' : 'white'
 		});
-
-		dialog.addEventListener('click', function onClick(e) {
-
-			if (e.cancel === true || e.index === examples.length || !examples[e.index]) {
-				return;
-			}
-
-			urlField.value = examples[e.index].url;
-			alloySwitch.value = !!examples[e.index].alloy;
+		var table = Ti.UI.createTableView({
+			data: samples.map(function (sample) {
+				return {
+					title: sample.label
+				};
+			})
 		});
+		table.addEventListener('click', function (e) {
+			urlField.value = samples[e.index].url;
+			alloySwitch.value = !!samples[e.index].alloy;
 
-		dialog.show();
+			samplesWin.close();
+		});
+		samplesWin.add(table);
+		samplesWin.open();
 	});
 
 	var scanBtn = Ti.UI.createButton({
@@ -72,6 +81,7 @@ exports.createDialog = function createDialog() {
 		paddingRight: 10,
 		keyboardType: Ti.UI.KEYBOARD_URL,
 		autocorrect: false,
+		autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE,
 		hintText: 'http://',
 
 		// FIXME: https://jira.appcelerator.org/browse/TIMOB-19124
@@ -89,24 +99,29 @@ exports.createDialog = function createDialog() {
 	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19131
 	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19132
 	var alloySwitch;
+
+	function setAlloy(val) {
+		val = !!val;
+		if (CFG.OS_WINDOWS) {
+			alloySwitch.applyProperties({
+				value: val,
+				title: val ? 'ALLOY' : 'CLASSIC',
+				backgroundColor: val ? 'white' : '#aa1617',
+				color: val ? '#aa1617' : 'white'
+			});
+		} else {
+			alloySwitch.value = val;
+		}
+	}
 	if (CFG.OS_WINDOWS) {
 		alloySwitch = Ti.UI.createButton({
 			top: 210,
 			width: 100,
-			height: 40,
-			value: !!settings.alloy,
-			title: settings.alloy ? 'ALLOY' : 'CLASSIC',
-			backgroundColor: settings.alloy ? 'white' : '#aa1617',
-			color: settings.alloy ? '#aa1617' : 'white'
+			height: 40
 		});
+		setAlloy(settings.alloy);
 		alloySwitch.addEventListener('click', function (e) {
-			var value = !e.source.value;
-			e.source.applyProperties({
-				value: value,
-				title: value ? 'ALLOY' : 'CLASSIC',
-				backgroundColor: value ? 'white' : '#aa1617',
-				color: value ? '#aa1617' : 'white'
-			});
+			setAlloy(!e.source.value);
 		});
 	} else {
 		alloySwitch = Ti.UI.createSwitch({
@@ -221,17 +236,10 @@ exports.createDialog = function createDialog() {
 
 		// FIXME: https://jira.appcelerator.org/browse/TIMOB-19048
 		text: CFG.OS_IOS ? 'Shake anytime to return to this screen.' : 'Shake or use the hardware back button\nto return to this screen.',
-		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
-
-		// FIXME: https://jira.appcelerator.org/browse/TIMOB-19048
-		height: Ti.UI.SIZE,
-		width: Ti.UI.SIZE
+		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER
 	});
 
-	// FIXME: https://jira.appcelerator.org/browse/TIMOB-18754
-	if (!CFG.OS_WINDOWS) {
-		win.add(samplesBtn);
-	}
+	win.add(samplesBtn);
 
 	// FIXME: https://jira.appcelerator.org/browse/MOD-2133
 	if (!CFG.OS_WINDOWS) {
@@ -304,5 +312,35 @@ exports.createDialog = function createDialog() {
 		});
 	}
 
+	// update samples for first use
+	updateSamples();
+
 	return win;
 };
+
+function getSamples() {
+
+	// update samples for next time
+	updateSamples();
+
+	return Ti.App.Properties.getList('liveviewer::samples', [{
+		'label': 'Movies',
+		'url': 'https://github.com/appcelerator/movies'
+	}]);
+}
+
+function updateSamples() {
+
+	xhr(CFG.SERVER_URL + '/samples.json', {
+
+		// GitHub raw JSON returns as text/plain
+		contentType: 'application/json'
+
+	}, function (err, res) {
+
+		if (!err) {
+			Ti.App.Properties.setList('liveviewer::samples', res);
+		}
+
+	});
+}
