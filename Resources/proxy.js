@@ -150,7 +150,6 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 				console.debug('require js: ' + id);
 
 				var functionBody = file.read().text;
-
 				functionBody = TiProxy.convert(functionBody, {
 					resource: true,
 					exception: true,
@@ -182,9 +181,6 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 				var argValues = _.values(scope);
 
 				var fn = new Function(argNames, functionBody);
-
-				// console.debug(filename, functionBody);
-
 				fn.apply(undefined, argValues);
 
 				cache[id] = module.exports;
@@ -213,7 +209,6 @@ exports.createProxy = function createProxy(resourcesDirectory) {
 		path = relativePath(path);
 
 		var file, modifiedPath;
-
 		var extname = utils.extname(path);
 
 		if (extname === '.png' || extname === '.jpg') {

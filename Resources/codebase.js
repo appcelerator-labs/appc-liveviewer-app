@@ -60,7 +60,7 @@ exports.create = function create(opts, callback) {
 		}
 
 		var resourcesDirectory = path.substr(0, path.lastIndexOf(CFG.SEPARATOR));
-
+		
 		var moduleId = path.substr(resourcesDirectory.length + 1);
 		moduleId = moduleId.substr(0, moduleId.lastIndexOf('.'));
 

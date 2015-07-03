@@ -1,4 +1,5 @@
-(function LiveViewer(global) {
+// FIXME: https://jira.appcelerator.org/browse/TIMOB-19155
+(function (global) {
 
 	try {
 

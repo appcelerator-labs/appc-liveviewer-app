@@ -59,7 +59,7 @@ Utils.joinPath = function joinPath(args) {
 			var arg = args[i];
 
 			// only adds a slash when left arguments don't have it
-			if (arg.charAt(0) !== CFG.SEPARATOR && path.charAt(arg.length - 1) !== CFG.SEPARATOR) {
+			if (arg.charAt(0) !== CFG.SEPARATOR && path.charAt(path.length - 1) !== CFG.SEPARATOR) {
 				path += CFG.SEPARATOR + arg;
 			} else {
 				path += arg;
