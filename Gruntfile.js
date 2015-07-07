@@ -1,3 +1,5 @@
+var fs = require('fs');
+
 module.exports = function (grunt) {
 
   grunt.initConfig({
@@ -82,33 +84,53 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-titanium');
   grunt.loadNpmTasks('grunt-shell');
 
-  grunt.registerTask('tiapp', function () {
-    var tiapp = require('tiapp.xml').load();
+  grunt.registerTask('version', function (what) {
+    var index = ['major', 'minor', 'patch'].indexOf(what);
 
-    var versions = tiapp.version.split('.');
-    versions[3] = parseInt(versions[3], 10) + 1;
-    tiapp.version = versions.join('.');
+    var tiapp = fs.readFileSync('tiapp.xml', {
+      encoding: 'utf-8'
+    });
 
-    var androids = tiapp.doc.documentElement.getElementsByTagName('android');
+    if (index !== -1) {
 
-    if (androids.length === 1) {
-      var manifests = androids.item(0).getElementsByTagName('manifest');
+      tiapp = tiapp.replace(/(<version>)([^<]+)(<\/version>)/, function (match, before, version, after) {
+        version = version.split('.');
 
-      if (manifests.length === 1) {
-        var manifest = manifests.item(0);
+        // bump index and reset following
+        for (var i = index; i <= 2; i++) {
+          version[i] = (i === index) ? (parseInt(version[i], 10) + 1).toString() : '0';
+        }
 
-        manifest.setAttribute('android:versionName', versions.slice(0, 3).join('.'));
-        manifest.setAttribute('android:versionCode', parseInt(manifest.getAttribute('android:versionCode'), 10) + 1);
-      }
+        version = version.join('.');
+
+        grunt.log.writeln('Bumped version to: ' + version);
+
+        return before + version + after;
+      });
+
     }
 
-    tiapp.write();
+    tiapp = tiapp.replace(/(android:versionCode=")([^"]+)(")/, function (match, before, versionCode, after) {
+      versionCode = parseInt(versionCode, 10) + 1;
 
-    grunt.log.writeln(require('util').format('Bumped version to: %s', tiapp.version));
+      grunt.log.writeln('Bumped android:versionCode to: ' + versionCode);
+
+      return before + versionCode + after;
+    });
+
+    tiapp = tiapp.replace(/(<key>CFBundleVersion<\/key>\s*<string>)([^<]+)(<\/string>)/mg, function (match, before, CFBundleVersion, after) {
+      CFBundleVersion = parseInt(CFBundleVersion, 10) + 1;
+
+      grunt.log.writeln('Bumped CFBundleVersion to: ' + CFBundleVersion);
+
+      return before + CFBundleVersion + after;
+    });
+
+    fs.writeFileSync('tiapp.xml', tiapp);
   });
 
-  grunt.registerTask('bump', ['tiapp']);
-  grunt.registerTask('build', ['titanium:clean', 'titanium:ios', 'titanium:android']);
+  grunt.registerTask('bump', ['version:build']);
+  grunt.registerTask('build', ['titanium:clean', 'titanium:ios', 'titanium:clean', 'titanium:android']);
   grunt.registerTask('upload', ['shell']);
 
   grunt.registerTask('apple', ['bump', 'titanium:clean', 'titanium:appstore']);

@@ -6,7 +6,7 @@ var Barcode = CFG.OS_WINDOWS ? null : require('ti.barcode');
 exports.createDialog = function createDialog() {
 	var settings = Ti.App.Properties.getObject('proxy::settings', {
 		alloy: false,
-		url: ''
+		url: 'https://gist.github.com/FokkeZB/71bf38d2371c27132960'
 	});
 
 	var win = Ti.UI.createWindow({

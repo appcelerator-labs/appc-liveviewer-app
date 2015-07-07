@@ -1,6 +1,5 @@
 {
   "devDependencies": {
-  	"tiapp.xml": "0.2.2",
     "grunt": "^0.4.5",
     "grunt-shell": "^1.1.2",
     "grunt-titanium": "FokkeZB/grunt-titanium#patch-3"
