@@ -23,7 +23,6 @@ exports.createDialog = function createDialog() {
 		color: 'white'
 	});
 
-	// FIXME: https://jira.appcelerator.org/browse/TIMOB-18754
 	samplesBtn.addEventListener('click', function onClick() {
 		var samples = getSamples();
 
@@ -31,14 +30,16 @@ exports.createDialog = function createDialog() {
 			top: CFG.OS_IOS ? 20 : 0,
 
 			// FIXME: https://jira.appcelerator.org/browse/TIMOB-19142
-			backgroundColor: CFG.OS_WINDOWS ? 'black' : 'white'
+			backgroundColor: CFG.OS_IOS ? 'white' : 'black'
 		});
 		var table = Ti.UI.createTableView({
 			data: samples.map(function (sample) {
 				return {
-					title: sample.label
+					title: sample.label,
+					color: CFG.OS_IOS ? 'black' : 'white'
 				};
-			})
+			}),
+			rowHeight: 40
 		});
 		table.addEventListener('click', function (e) {
 			urlField.value = samples[e.index].url;
@@ -71,10 +72,6 @@ exports.createDialog = function createDialog() {
 		right: 20,
 		left: 20,
 		height: Ti.Platform.name === 'android' ? Ti.UI.SIZE : 40,
-
-		// FIXME: https://jira.appcelerator.org/browse/TIMOB-19119
-		width: Ti.UI.FILL,
-
 		paddingLeft: 10,
 		paddingRight: 10,
 		keyboardType: Ti.UI.KEYBOARD_URL,
@@ -201,13 +198,9 @@ exports.createDialog = function createDialog() {
 
 		require('codebase').create(settings, function afterCreate(err) {
 
-			// FIXME: https://jira.appcelerator.org/browse/TIMOB-19130
-			if (!CFG.OS_WINDOWS) {
-
-				// hide indicator so the loading app has a solid black background
-				loadingWin.remove(loadingIndicator);
-				loadingIndicator = null;
-			}
+			// hide indicator so the loading app has a solid black background
+			loadingWin.remove(loadingIndicator);
+			loadingIndicator = null;
 
 			if (err) {
 				loadingWin.close();

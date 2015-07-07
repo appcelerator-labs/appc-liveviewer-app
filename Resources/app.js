@@ -5,11 +5,6 @@
 
 	var CFG = require('CFG');
 
-	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19125
-	if (CFG.OS_WINDOWS && !global.console.debug) {
-		global.console.debug = Ti.API.debug;
-	}
-
 	require('ui').createDialog().open();
 
 	Ti.Gesture.addEventListener('shake', restart);

@@ -18,9 +18,23 @@ Utils.ensureDirSync = function ensureDirSync(path) {
 	var create = [];
 	var exists = false;
 	var dir;
+	var base;
+
+	var baseIndex = path.indexOf('://');
+
+	if (baseIndex !== -1) {
+		base = path.substr(0, baseIndex + 3);
+
+	} else {
+		baseIndex = path.indexOf(CFG.SEPARATOR);
+		base = path.substr(0, baseIndex + CFG.SEPARATOR.length);
+	}
+
+	path = path.substr(base.length);
 
 	while (!exists) {
-		var file = Ti.Filesystem.getFile(path);
+
+		var file = Ti.Filesystem.getFile(base, path);
 
 		if (!dir) {
 			dir = file;

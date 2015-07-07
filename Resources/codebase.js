@@ -18,7 +18,7 @@ exports.clean = function clean() {
 
 exports.create = function create(opts, callback) {
 
-	// in case we were not reset by shake (e.g. Android back);
+	// in case we were not reset by shake (e.g. Android/Windows back);
 	exports.clean();
 
 	var url = opts.url;
@@ -26,15 +26,9 @@ exports.create = function create(opts, callback) {
 
 	var uuid = Ti.Platform.createUUID();
 
-	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19127
-	if (CFG.OS_WINDOWS) {
-		uuid = uuid.replace(/[\{\}]/g, '');
-	}
-
 	console.debug('url: ' + url);
 	console.debug('uuid: ' + uuid);
 
-	// FIXME: https://jira.appcelerator.org/browse/TIMOB-19128
 	var dir = utils.ensureDirSync(utils.joinPath(Ti.Filesystem.applicationDataDirectory, CFG.DATA_DIR, uuid));
 
 	// we only need the path, not the object
