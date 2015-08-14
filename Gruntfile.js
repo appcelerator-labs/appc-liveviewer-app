@@ -47,7 +47,7 @@ module.exports = function (grunt) {
           platform: 'android',
           buildOnly: true,
           target: 'dist-playstore',
-          keystore: '_conf/android.keystore',
+          keystore: '_assets/android.keystore',
           alias: 'liveviewer',
           storePassword: 'appcelerator',
           outputDir: './dist'
