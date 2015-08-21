@@ -6,7 +6,7 @@ module.exports = function (grunt) {
     settings: {
       releaseNotes: grunt.option('notes') || 'CI build',
       appName: 'LiveViewer',
-      ppUuid: '964a26fe-3710-4edb-bf00-250eec45a31d',
+      ppUuid: '3db13f29-5a82-433c-aaeb-aee2be0e7e93',
       distributionName: 'Fokke Zandbergen (Y39937U7XN)',
       ppUuidStore: '',
       installrAppToken: '6xC0I8SdJc76kWwpqq7LhZLIyq6fBP4Z'
