@@ -1,4 +1,5 @@
-# LiveViewer App
+# ~~LiveViewer App~~ App Viewer
+
 An app to load and run Titanium and Alloy code from any URL, GitHub repositories and gists.
 
 ![screenshots](screenshots.png)
